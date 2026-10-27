@@ -1,6 +1,6 @@
 [package]
 name = "pdfmer"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2021"
 description = "IT-Tools desktop toolbox for Windows"
 license = "MIT"

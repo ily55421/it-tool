@@ -1,0 +1,18 @@
+[package]
+name = "it-tools-setup"
+version = "0.0.0"
+edition = "2021"
+description = "Single-file installer for IT-Tools desktop toolbox"
+
+[[bin]]
+name = "it-tools-setup"
+path = "src/main.rs"
+
+[dependencies]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

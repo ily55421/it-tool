@@ -1,0 +1,88 @@
+.image-nav-container {
+    min-height: calc(100vh - 60px);
+    padding: 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.image-nav-header {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+
+.image-nav-header h2 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+.image-nav-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+.image-nav-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.image-nav-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.image-nav-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.image-nav-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.image-nav-card.disabled:hover {
+    transform: none;
+}
+
+.card-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.card-desc {
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .image-nav-container {
+        padding: 20px;
+    }
+    
+    .image-nav-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    .image-nav-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}

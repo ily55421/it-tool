@@ -1,0 +1,375 @@
+/* ============================================================
+   统一页面层 —— 所有工具页共用同一套外壳、标题、按钮与卡片
+   加载顺序：放在最后，用同等或更高特异性覆盖各页面自带样式；
+   合并页（.pm-page）内部特异性更高，不受影响。
+   页面标题图标与标题文案由 app-center.js 按注册表统一注入。
+   ============================================================ */
+
+:root {
+    --page-w-narrow: 940px;
+    --page-w-mid: 1120px;
+    --page-w-wide: 1280px;
+    --page-pad: 24px 28px 56px;
+    --brand-a: #2f7fe8;
+    --brand-b: #1850d2;
+    --pg-line: #e3ebf3;
+    --pg-soft: #f5f8fb;
+    --pg-text: #22344a;
+    --pg-muted: #7b8b9c;
+    --pg-radius: 14px;
+    --pg-shadow: 0 2px 10px rgba(44, 62, 80, .07);
+}
+
+/* ---------- 页面外壳 ---------- */
+.container,
+.image-processor-container,
+.image-format-container,
+.image-exif-container,
+.idphoto-container,
+.qrcode-tool-container,
+.gif-tool-container,
+.pdf-to-image-container,
+.json-formatter-container {
+    width: 100%;
+    max-width: var(--page-w-wide);
+    margin: 0 auto;
+    padding: var(--page-pad);
+}
+
+.tools-container {
+    max-width: var(--page-w-mid);
+    margin: 0 auto;
+    padding: var(--page-pad);
+}
+
+.tool-detail {
+    max-width: var(--page-w-narrow);
+    margin: 0 auto;
+    padding: var(--page-pad);
+}
+
+/* ---------- 页头 ---------- */
+header,
+.tools-header,
+.image-processor-header,
+.format-header,
+.exif-header,
+.idphoto-header,
+.qrcode-header,
+.gif-header,
+.pdf-header,
+.image-nav-header {
+    display: block;
+    text-align: left;
+    margin: 0 0 22px;
+    padding: 0;
+}
+
+header h1,
+.tools-header h1,
+.tool-detail-header h1,
+.json-formatter-header h1,
+.json-formatter-header h2,
+.image-processor-header h1,
+.image-processor-header h2,
+.format-header h1,
+.format-header h2,
+.exif-header h1,
+.exif-header h2,
+.idphoto-header h1,
+.idphoto-header h2,
+.qrcode-header h1,
+.qrcode-header h2,
+.gif-header h1,
+.gif-header h2,
+.pdf-header h1,
+.pdf-header h2,
+.image-nav-header h2,
+.diff-toolbar-title,
+.jv-toolbar-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: .2px;
+    color: var(--pg-text);
+}
+
+header p,
+.tools-header p,
+.tool-detail-header p,
+.image-processor-header p,
+.format-header p,
+.exif-header p,
+.idphoto-header p,
+.qrcode-header p,
+.gif-header p,
+.pdf-header p,
+.json-formatter-header p {
+    margin: 0;
+    color: var(--pg-muted);
+    font-size: .92rem;
+}
+
+/* 注册表注入的工具图标徽标 */
+.page-head-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    color: #fff;
+    background: linear-gradient(135deg, var(--ac-a, var(--brand-a)), var(--ac-b, var(--brand-b)));
+    box-shadow: 0 4px 10px rgba(34, 52, 74, .14);
+}
+
+.page-head-icon .ac-svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* 工具页返回链接与标题同排 */
+.tool-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.tool-detail-header h1 {
+    margin: 0;
+}
+
+/* ---------- 区块标题 ---------- */
+h2,
+h3 {
+    color: var(--pg-text);
+    font-weight: 700;
+}
+
+.panel-header h2,
+.json-panel-header h2,
+.preview-header h2,
+.tool-result-header h2,
+.tool-result-title,
+.image-panel-header h2,
+.control-panel-header h2 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+h3 {
+    font-size: .96rem;
+}
+
+/* ---------- 按钮 ---------- */
+.btn,
+.tool-btn,
+.format-btn,
+.tab-btn,
+.gif-tab-btn,
+.mode-btn,
+.color-btn,
+.btn-rotate,
+.diff-toolbar-btn,
+.jv-toolbar-btn,
+.jv-search-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease, color .16s ease;
+}
+
+.btn-primary,
+.tool-btn-primary,
+.btn-success {
+    border: none;
+    color: #fff;
+    background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
+    box-shadow: 0 4px 12px rgba(47, 127, 232, .26);
+}
+
+.btn-primary:hover:not(:disabled),
+.tool-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4a90ef, #2f66d8);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(47, 127, 232, .32);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #2ecc71, #21a05d);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, .26);
+}
+
+.btn-secondary,
+.tool-btn-secondary,
+.format-btn,
+.tab-btn,
+.gif-tab-btn,
+.mode-btn,
+.color-btn,
+.btn-rotate,
+.diff-toolbar-btn,
+.jv-toolbar-btn {
+    border: 1px solid var(--pg-line);
+    background: #fff;
+    color: #40556d;
+}
+
+.btn-secondary:hover,
+.tool-btn-secondary:hover,
+.format-btn:hover,
+.tab-btn:hover,
+.gif-tab-btn:hover,
+.mode-btn:hover,
+.color-btn:hover,
+.btn-rotate:hover,
+.diff-toolbar-btn:hover,
+.jv-toolbar-btn:hover {
+    border-color: #bcd9f5;
+    background: var(--pg-soft);
+    color: var(--brand-b);
+}
+
+.format-btn.active,
+.tab-btn.active,
+.gif-tab-btn.active,
+.mode-btn.active,
+.diff-toolbar-btn.active,
+.jv-toolbar-btn.active {
+    border-color: #bcd9f5;
+    background: #eaf3fe;
+    color: var(--brand-b);
+}
+
+.btn:disabled,
+.tool-btn:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ---------- 面板与卡片 ---------- */
+.tool-form,
+.tool-result,
+.json-panel,
+.json-formatter-panel,
+.image-panel,
+.control-panel,
+.exif-preview-panel,
+.exif-info-panel,
+.qrcode-input-section,
+.qrcode-preview-section,
+.gif-panel,
+.gif-left-panel,
+.gif-right-panel,
+.idphoto-panel,
+.idphoto-left-panel,
+.idphoto-right-panel,
+.format-panel,
+.format-left-panel,
+.format-right-panel,
+.pdf-panel,
+.pdf-left-panel,
+.pdf-right-panel,
+.jv-panel,
+.editor-container,
+.result-card,
+.info-card,
+.image-info-box,
+.upload-card,
+.input-card,
+.pages-card,
+.git-section,
+.preview-area,
+.file-section {
+    background: #fff;
+    border: 1px solid var(--pg-line);
+    border-radius: var(--pg-radius);
+    box-shadow: var(--pg-shadow);
+}
+
+.panel-header,
+.json-panel-header,
+.preview-header,
+.tool-result-header,
+.diff-input-header,
+.diff-result-header,
+.jv-panel-header,
+.jv-canvas-header,
+.image-panel-header,
+.control-panel-header {
+    border-bottom: 1px solid var(--pg-line);
+    background: var(--pg-soft);
+    color: var(--pg-text);
+}
+
+/* ---------- 表单控件 ---------- */
+.tool-input,
+.tool-textarea,
+.tool-select,
+.jv-search-box,
+.jv-search-box input,
+.input-group input:not([type="checkbox"]),
+.setting-group input:not([type="checkbox"]):not([type="radio"]),
+.setting-group select,
+.control-panel select,
+.control-panel input[type="text"],
+.control-panel input[type="number"],
+.idphoto-controls select,
+.idphoto-controls input[type="number"],
+.format-options select,
+.format-options input[type="number"],
+.pdf-options select,
+.pdf-options input[type="number"] {
+    border: 1.5px solid var(--pg-line);
+    border-radius: 9px;
+    background: #fff;
+    color: var(--pg-text);
+    font-family: inherit;
+}
+
+.jv-search-box {
+    border: 1.5px solid var(--pg-line);
+    padding: 4px 10px;
+}
+
+.jv-search-box input {
+    border: none;
+    padding: 0;
+}
+
+/* ---------- 代码类文本区统一 ---------- */
+.tool-textarea,
+.json-editor,
+.jv-editor,
+.diff-input-textarea,
+.diff-line-text,
+.diff-line-num,
+.diff-line-prefix,
+.diff-input-line-numbers {
+    font-family: Consolas, Monaco, 'Courier New', monospace;
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 960px) {
+    :root {
+        --page-pad: 18px 16px 40px;
+    }
+
+    header h1,
+    .tools-header h1,
+    .tool-detail-header h1,
+    .diff-toolbar-title,
+    .jv-toolbar-title {
+        font-size: 1.3rem;
+    }
+}

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片转PDF - PDF 合并工具</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/image_to_pdf.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-with-nav">
+                <div>
+                    <h1>🖼️ 图片转 PDF</h1>
+                    <p>上传图片，旋转调整后转换为单页 PDF</p>
+                </div>
+                <a href="/" class="back-link">← 返回 PDF 合并</a>
+            </div>
+        </header>
+
+        <div class="converter-layout">
+            <!-- Left Panel: Upload & Controls -->
+            <div class="left-panel">
+                <!-- Upload Area -->
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">📁</div>
+                        <h3>拖拽图片到此处</h3>
+                        <p>支持 JPG、PNG、GIF、BMP 格式</p>
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                        <button type="button" id="browseBtn">选择图片</button>
+                    </div>
+                </div>
+
+                <!-- Image Info -->
+                <div id="imageInfo" class="image-info hidden">
+                    <h3>图片信息</h3>
+                    <div class="info-item">
+                        <span class="label">文件名:</span>
+                        <span id="infoFilename">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">尺寸:</span>
+                        <span id="infoDimensions">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">大小:</span>
+                        <span id="infoSize">-</span>
+                    </div>
+                </div>
+
+                <!-- Rotation Controls -->
+                <div id="rotationControls" class="rotation-controls hidden">
+                    <h3>旋转调整</h3>
+                    <div class="rotation-buttons">
+                        <button type="button" id="rotateLeft" class="btn-rotate">
+                            ↺ 左旋 90°
+                        </button>
+                        <button type="button" id="rotateRight" class="btn-rotate">
+                            ↻ 右旋 90°
+                        </button>
+                        <button type="button" id="rotateCustom" class="btn-rotate">
+                            🔄 自定义角度
+                        </button>
+                        <button type="button" id="resetRotation" class="btn-rotate">
+                            ↩ 重置
+                        </button>
+                    </div>
+                    <div class="rotation-display">
+                        <span class="label">当前旋转:</span>
+                        <span id="rotationValue">0°</span>
+                    </div>
+                </div>
+
+                <!-- Output Filename -->
+                <div id="outputControls" class="output-controls hidden">
+                    <h3>输出设置</h3>
+                    <div class="input-group">
+                        <label for="outputFilename">PDF 文件名:</label>
+                        <input type="text" id="outputFilename" value="converted" placeholder="输入文件名">
+                        <span class="extension">.pdf</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div id="actionButtons" class="actions hidden">
+                    <button id="convertBtn" class="btn btn-primary">
+                        📄 转换为 PDF
+                    </button>
+                    <button id="clearBtn" class="btn btn-secondary">
+                        🗑️ 清空
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: Preview -->
+            <div class="right-panel">
+                <div class="preview-header">
+                    <h2>👁️ 预览</h2>
+                    <span id="previewDimensions" class="page-count">-</span>
+                </div>
+                
+                <div id="previewContainer" class="preview-container">
+                    <div class="preview-empty-state">
+                        <div class="preview-icon">🖼️</div>
+                        <p>上传图片后将显示预览</p>
+                        <p class="hint">支持旋转调整预览效果</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="overlay hidden">
+            <div class="spinner"></div>
+            <p id="loadingText">处理中...</p>
+        </div>
+
+        <!-- Success Modal -->
+        <div id="successModal" class="modal hidden">
+            <div class="modal-content">
+                <h3>🎉 转换成功！</h3>
+                <p>图片已成功转换为 PDF</p>
+                <a id="downloadLink" class="btn btn-success" target="_blank">
+                    📥 下载 PDF
+                </a>
+                <button id="closeModal" class="btn btn-secondary">
+                    关闭
+                </button>
+            </div>
+        </div>
+
+        <!-- Custom Rotation Modal -->
+        <div id="customRotationModal" class="modal hidden">
+            <div class="modal-content modal-small">
+                <h3>自定义旋转角度</h3>
+                <div class="input-group">
+                    <label for="customAngle">旋转角度:</label>
+                    <input type="number" id="customAngle" value="0" min="-360" max="360" placeholder="输入角度">
+                    <span class="extension">°</span>
+                </div>
+                <div class="modal-actions">
+                    <button id="applyCustomRotation" class="btn btn-primary">应用</button>
+                    <button id="cancelCustomRotation" class="btn btn-secondary">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/image_to_pdf.js"></script>
+</body>
+</html>

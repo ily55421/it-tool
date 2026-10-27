@@ -1,0 +1,573 @@
+/* ============================================================
+   UI Refresh —— 全站工具页统一视觉层
+   加载顺序：所有页面样式之后，用同等特异性覆盖旧样式；
+   合并页（.pm-page）内部样式特异性更高，不受影响。
+   ============================================================ */
+
+:root {
+    --ui-blue: #3498db;
+    --ui-blue-dark: #2980b9;
+    --ui-blue-soft: #eaf4fe;
+    --ui-green: #27ae60;
+    --ui-red: #e74c3c;
+    --ui-text: #22344a;
+    --ui-muted: #7b8b9c;
+    --ui-line: #e3ebf3;
+    --ui-soft: #f8fafc;
+    --ui-radius: 14px;
+    --ui-shadow: 0 2px 10px rgba(44, 62, 80, .07);
+}
+
+/* ---------- 基础版式 ---------- */
+body {
+    color: var(--ui-text);
+    background-color: #f4f7fb;
+}
+
+.main-content {
+    background-color: #f4f7fb;
+}
+
+.container {
+    max-width: 1440px;
+    padding: 26px 30px 48px;
+}
+
+.tools-container {
+    max-width: 1320px;
+    padding: 26px 30px 48px;
+}
+
+.tool-detail {
+    max-width: 1080px;
+    padding: 24px 30px 48px;
+}
+
+header {
+    margin-bottom: 26px;
+}
+
+header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--ui-text);
+    margin-bottom: 8px;
+    letter-spacing: .2px;
+}
+
+header p {
+    color: var(--ui-muted);
+    font-size: .95rem;
+}
+
+.tools-header {
+    margin-bottom: 26px;
+}
+
+.tools-header h1 {
+    font-size: 2rem;
+    color: var(--ui-text);
+}
+
+.tools-header p {
+    color: var(--ui-muted);
+    font-size: .95rem;
+}
+
+/* 标题去掉旧的紫色下划线风格 */
+h2 {
+    border-bottom: none;
+    padding-bottom: 0;
+    display: block;
+    color: var(--ui-text);
+    font-size: 1.12rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.json-panel-header h2,
+.panel-header h2,
+.preview-header h2,
+.tool-result-header h2,
+.json-formatter-header h2 {
+    margin: 0;
+    font-size: 1.02rem;
+}
+
+/* ---------- 通用卡片 ---------- */
+.tool-form,
+.tool-card,
+.tool-result,
+.json-panel,
+.json-formatter-panel,
+.diff-input-section,
+.diff-result-section,
+.jv-editor-panel,
+.jv-canvas-panel,
+.image-panel,
+.control-panel,
+.exif-preview-panel,
+.exif-info-panel,
+.qrcode-input-section,
+.qrcode-preview-section,
+.upload-section .upload-area,
+.editor-container,
+.result-card,
+.info-card,
+.image-info-box,
+.preview-area,
+.file-section,
+.right-panel {
+    background: #fff;
+    border: 1px solid var(--ui-line);
+    border-radius: var(--ui-radius);
+    box-shadow: var(--ui-shadow);
+}
+
+.panel-header,
+.json-panel-header,
+.preview-header,
+.tool-result-header,
+.diff-input-header,
+.jv-panel-header {
+    border-bottom: 1px solid var(--ui-line);
+}
+
+/* ---------- 上传区域统一 ---------- */
+.upload-area,
+.image-upload-area {
+    border: 2px dashed #b9d2ea;
+    border-radius: var(--ui-radius);
+    background: radial-gradient(120% 90% at 50% 0%, #f5faff 0%, #ffffff 60%);
+    padding: 32px 22px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .25s ease, background-color .25s ease, box-shadow .25s ease, transform .25s ease;
+}
+
+.upload-area:hover,
+.upload-area.drag-over,
+.image-upload-area:hover,
+.image-upload-area.drag-over {
+    border-color: var(--ui-blue);
+    background-color: var(--ui-blue-soft);
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, .13);
+}
+
+.upload-icon {
+    font-size: 2.6rem;
+    margin-bottom: 10px;
+}
+
+.upload-text,
+.upload-placeholder p {
+    font-weight: 600;
+    color: var(--ui-text);
+}
+
+.upload-hint,
+.upload-placeholder small {
+    color: var(--ui-muted);
+    font-size: .85rem;
+}
+
+/* ---------- 按钮 ---------- */
+.btn {
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-size: .95rem;
+    font-weight: 600;
+    transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, .28);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #4aa8e0, #3287c4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(52, 152, 219, .36);
+}
+
+.btn-secondary {
+    background: #eef2f6;
+    color: #33465c;
+}
+
+.btn-secondary:hover {
+    background: #e2e9f0;
+    transform: translateY(-2px);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    box-shadow: 0 4px 12px rgba(39, 174, 96, .26);
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(39, 174, 96, .34);
+}
+
+.tool-btn {
+    border-radius: 10px;
+    padding: 11px 22px;
+    font-size: .95rem;
+}
+
+.tool-btn-primary {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, .28);
+}
+
+.tool-btn-primary:hover {
+    background: linear-gradient(135deg, #4aa8e0, #3287c4);
+    box-shadow: 0 8px 18px rgba(52, 152, 219, .36);
+}
+
+.tool-btn-secondary {
+    background: #eef2f6;
+    color: #33465c;
+    border: 1px solid var(--ui-line);
+}
+
+.back-btn {
+    border-radius: 9px;
+    background: #fff;
+    border: 1px solid var(--ui-line);
+    color: #475569;
+    box-shadow: 0 1px 3px rgba(44, 62, 80, .06);
+}
+
+.back-btn:hover {
+    background: var(--ui-blue-soft);
+    color: var(--ui-blue-dark);
+}
+
+/* ---------- 表单控件 ---------- */
+.tool-input,
+.tool-textarea,
+.tool-select,
+.tool-form-group input:not([type="checkbox"]):not([type="radio"]),
+.tool-form-group select,
+.tool-form-group textarea,
+.input-group input:not([type="checkbox"]),
+.setting-group input:not([type="checkbox"]):not([type="radio"]),
+.setting-group select,
+.page-range input,
+.size-inputs input,
+.crop-inputs input,
+.option-group input[type="text"],
+.option-row select,
+.size-inputs-inline input {
+    border: 1.5px solid var(--ui-line);
+    border-radius: 9px;
+    padding: 9px 12px;
+    font-size: .95rem;
+    color: var(--ui-text);
+    background: #fff;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.tool-input:focus,
+.tool-textarea:focus,
+.tool-select:focus,
+.tool-form-group input:not([type="checkbox"]):not([type="radio"]):focus,
+.tool-form-group select:focus,
+.tool-form-group textarea:focus,
+.input-group input:focus,
+.setting-group input:focus,
+.setting-group select:focus,
+.page-range input:focus,
+.size-inputs input:focus,
+.crop-inputs input:focus,
+.option-group input[type="text"]:focus,
+.option-row select:focus {
+    outline: none;
+    border-color: var(--ui-blue);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, .15);
+}
+
+.tool-checkbox input {
+    accent-color: var(--ui-blue);
+}
+
+/* ---------- 工具栏 / 标签按钮 ---------- */
+.diff-toolbar,
+.jv-toolbar {
+    background: #fff;
+    border: 1px solid var(--ui-line);
+    border-radius: 12px;
+    box-shadow: var(--ui-shadow);
+}
+
+.diff-toolbar-btn,
+.jv-toolbar-btn {
+    border-radius: 8px;
+    transition: background-color .2s ease, color .2s ease;
+}
+
+.diff-toolbar-btn.active,
+.jv-toolbar-btn.active {
+    background: var(--ui-blue-soft);
+    color: var(--ui-blue-dark);
+}
+
+.tab-btn,
+.gif-tab-btn {
+    border-radius: 9px;
+}
+
+.tab-btn.active,
+.gif-tab-btn.active {
+    background: var(--ui-blue-soft);
+    color: var(--ui-blue-dark);
+    border-color: #bcd9f0;
+}
+
+.format-btn {
+    border-radius: 10px;
+    transition: border-color .2s ease, background-color .2s ease, transform .18s ease;
+}
+
+.format-btn:hover {
+    border-color: var(--ui-blue);
+    transform: translateY(-1px);
+}
+
+.format-btn.active {
+    border-color: var(--ui-blue);
+    background: var(--ui-blue-soft);
+    color: var(--ui-blue-dark);
+}
+
+/* ---------- 工具箱 / 图片导航卡片 ---------- */
+.tool-card {
+    border-radius: var(--ui-radius);
+    border: 1px solid var(--ui-line);
+    box-shadow: var(--ui-shadow);
+}
+
+.tool-card:hover {
+    transform: translateY(-3px);
+    border-color: #bcd9f0;
+    box-shadow: 0 10px 24px rgba(52, 152, 219, .15);
+}
+
+.tool-card-icon {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border-radius: 12px;
+}
+
+.image-nav-card {
+    border-radius: var(--ui-radius);
+    border: 1px solid var(--ui-line);
+    box-shadow: var(--ui-shadow);
+}
+
+.image-nav-card:hover {
+    transform: translateY(-3px);
+    border-color: #bcd9f0;
+    box-shadow: 0 10px 24px rgba(52, 152, 219, .15);
+}
+
+.stat-card {
+    border-radius: 12px;
+    border: 1px solid var(--ui-line);
+    box-shadow: var(--ui-shadow);
+}
+
+/* ---------- 预览区 / 结果区细节 ---------- */
+.preview-area,
+.preview-placeholder {
+    border-radius: 12px;
+}
+
+.preview-placeholder {
+    border-color: #d7e3ee;
+    color: var(--ui-muted);
+}
+
+.result-info,
+.download-area {
+    border-radius: 10px;
+}
+
+.info-row,
+.result-row {
+    border-bottom-color: var(--ui-line);
+}
+
+/* ---------- 弹窗 ---------- */
+.modal {
+    background-color: rgba(23, 36, 49, .5);
+    backdrop-filter: blur(2px);
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, .28);
+    padding: 28px;
+    width: calc(100% - 40px);
+}
+
+.modal-content h3 {
+    color: var(--ui-text);
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.modal-content p {
+    color: var(--ui-muted);
+    font-size: .92rem;
+    margin-bottom: 18px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-actions .btn {
+    flex: 1;
+}
+
+/* ---------- 工具栏按钮不换行 ---------- */
+.json-formatter-actions .btn,
+.image-actions .btn,
+.exif-actions .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    border-radius: 9px;
+}
+
+.qrcode-tabs .tab-btn,
+.gif-tabs .gif-tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* 面板允许在固定高度容器内收缩，避免底部溢出 */
+.image-panel,
+.control-panel,
+.json-formatter-panel,
+.exif-preview-panel,
+.exif-info-panel,
+.json-panel {
+    min-height: 0;
+}
+
+/* ---------- 工具箱首页底部提示 ---------- */
+.tools-footer-tip {
+    margin-top: 28px;
+    padding: 14px 18px;
+    text-align: center;
+    color: var(--ui-muted);
+    font-size: .85rem;
+    border-top: 1px dashed var(--ui-line);
+}
+
+/* ---------- 图片处理：模式按钮 ---------- */
+.mode-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.mode-btn {
+    padding: 7px 12px;
+    border: 1.5px solid var(--ui-line);
+    background: #f7fafd;
+    color: #4a5b6d;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: .8rem;
+    font-weight: 600;
+    font-family: inherit;
+    transition: border-color .18s ease, background-color .18s ease, color .18s ease;
+}
+
+.mode-btn:hover {
+    border-color: #bcd9f0;
+    color: var(--ui-blue-dark);
+}
+
+.mode-btn.active {
+    background: var(--ui-blue-soft);
+    border-color: #bcd9f0;
+    color: var(--ui-blue-dark);
+}
+
+/* ---------- 滚动条 ---------- */
+#app ::-webkit-scrollbar,
+.info-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+#app ::-webkit-scrollbar-thumb,
+.info-container::-webkit-scrollbar-thumb {
+    background: #c9d6e2;
+    border-radius: 8px;
+}
+
+#app ::-webkit-scrollbar-thumb:hover {
+    background: #b3c4d4;
+}
+
+#app ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* ---------- 空元素不占位 ---------- */
+.error-message:empty,
+.json-message:empty {
+    display: none;
+}
+
+/* ---------- 页面进入动画 ---------- */
+#app > .container,
+#app > .tools-container {
+    animation: uiFadeUp .3s ease both;
+}
+
+@keyframes uiFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 1100px) {
+    .tools-grid {
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .container {
+        padding: 20px 18px 40px;
+    }
+
+    .tools-container,
+    .tool-detail {
+        padding: 20px 18px 40px;
+    }
+
+    header h1 {
+        font-size: 1.65rem;
+    }
+
+    .tools-header h1 {
+        font-size: 1.65rem;
+    }
+}

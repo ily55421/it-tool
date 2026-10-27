@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT-Tools 工具箱</title>
+    <link rel="icon" type="image/svg+xml" href="/static/img/logo.svg">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/image_to_pdf.css">
+    <link rel="stylesheet" href="/static/css/it-tools.css">
+    <link rel="stylesheet" href="/static/css/diff.css">
+    <link rel="stylesheet" href="/static/css/json-vision.css">
+    <link rel="stylesheet" href="/static/css/json-formatter.css">
+    <link rel="stylesheet" href="/static/css/image-processor.css">
+    <link rel="stylesheet" href="/static/css/image-exif.css">
+    <link rel="stylesheet" href="/static/css/qrcode-tool.css">
+    <link rel="stylesheet" href="/static/css/image-format.css">
+    <link rel="stylesheet" href="/static/css/image-idphoto.css">
+    <link rel="stylesheet" href="/static/css/pdf-to-image.css">
+    <link rel="stylesheet" href="/static/css/gif-tool.css">
+    <link rel="stylesheet" href="/static/css/ui-refresh.css?v=20261019">
+    <link rel="stylesheet" href="/static/css/app-center.css">
+    <link rel="stylesheet" href="/static/css/ui-pages.css">
+    <!-- 大体积第三方库（pdf.js、jsQR、crypto-js 等）改为按需加载，见 lib-loader.js -->
+    <script src="/static/js/lib-loader.js" defer></script>
+    <script src="/static/js/tools-registry.js" defer></script>
+    <script src="/static/js/app-center.js" defer></script>
+    <script src="/static/js/qrcode-tool-component.js" defer></script>
+    <script src="/static/js/image-format-component.js" defer></script>
+    <script src="/static/js/image-idphoto-component.js" defer></script>
+    <script src="/static/js/pdf-to-image-component.js" defer></script>
+    <script src="/static/js/gif-tool-component.js" defer></script>
+    <script src="/static/js/json-formatter.js" defer></script>
+    <script src="/static/js/image-processor.js" defer></script>
+    <script src="/static/js/image-exif.js" defer></script>
+</head>
+<body>
+    <header class="app-bar">
+        <a class="app-bar-brand" href="#/apps">
+            <img class="app-bar-logo" src="/static/img/logo.svg" alt="IT-Tools 图标" draggable="false">
+            <span>IT-Tools</span>
+        </a>
+        <button class="app-bar-back" id="appBarBack" type="button" title="返回上一页" hidden></button>
+        <div class="app-bar-crumb" id="appBarCrumb"></div>
+        <span class="app-bar-spacer"></span>
+        <a class="app-bar-home" id="appBarHome" href="#/apps"></a>
+    </header>
+
+    <main class="main-content">
+        <div id="app">
+        </div>
+    </main>
+
+    <script src="/static/js/it-tools.js" defer></script>
+    <script src="/static/js/diff.js" defer></script>
+    <script src="/static/js/json-vision.js" defer></script>
+    <script src="/static/js/router.js" defer></script>
+</body>
+</html>

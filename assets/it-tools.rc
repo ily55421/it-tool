@@ -1,0 +1,3 @@
+/* IT-Tools application icon: explorer, taskbar and desktop shortcuts.
+   assets/it-tools.ico is generated from static/img/logo.svg by scripts/make-icon.ps1. */
+1 ICON "it-tools.ico"

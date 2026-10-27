@@ -1,0 +1,52 @@
+[package]
+name = "pdfmer"
+version = "1.1.0"
+edition = "2021"
+description = "IT-Tools desktop toolbox for Windows"
+license = "MIT"
+
+[features]
+console = []
+
+[dependencies]
+axum = { version = "0.8", features = ["multipart"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "fs", "io-util"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+rust-embed = "8"
+mime_guess = "2"
+percent-encoding = "2"
+uuid = { version = "1", features = ["v4", "v1", "rng"] }
+rand = "0.9"
+md-5 = "0.10"
+sha1 = "0.10"
+sha2 = "0.10"
+hmac = "0.12"
+hex = "0.4"
+base64 = "0.22"
+bcrypt = "0.17"
+aes = "0.8"
+cbc = { version = "0.1", features = ["alloc"] }
+bip39 = { version = "3", features = ["rand"] }
+ulid = "3"
+serde_yaml = "0.9"
+url = "2"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "gif", "bmp", "webp"] }
+lopdf = "0.46"
+pdfium-render = { version = "0.9", features = ["image_025", "thread_safe"] }
+genpdf = "0.2"
+flate2 = "1"
+zip = { version = "9", default-features = false, features = ["deflate"] }
+roxmltree = "0.21"
+html2text = "0.17"
+pulldown-cmark = "0.13"
+mobi = "0.8"
+tao = "0.37"
+wry = "0.57"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "unwind"
+strip = true

@@ -406,6 +406,17 @@ const CASES = [
     wait: 1600,
     check: `const out = __T.txt('urlOutput');
             return __T.ok(out.includes('a') && out.includes('1'), out.replace(/\\s+/g, ' ').slice(0, 50));`
+  },
+  {
+    // 回归护栏：跑完其它页面（尤其是图片转 PDF）后，合并页仍必须响应真实拖放。
+    // 曾经的 bug：body 上带 stopPropagation 的拖拽监听器没解绑，导致此后全站拖拽失效。
+    r: '/pdf-merge',
+    ready: "typeof router !== 'undefined' && !!document.getElementById('uploadArea')",
+    act: `const f = __T.file(__T.PDF_B64, 'final.pdf', 'application/pdf');
+          return __T.drop('.pm-page', [f]);`,
+    wait: 400,
+    check: `const ready = await __T.until("!!document.getElementById('mergeBtn') && !document.getElementById('mergeBtn').disabled", 10000);
+            return __T.ok(ready && __T.txt('fileCount') === '(1)', '拖拽投递 ' + __T.txt('fileCount') + '，按钮 ' + (ready ? '可点' : '仍禁用'));`
   }
 ];
 

@@ -2,8 +2,29 @@ class Router {
     constructor(routes) {
         this.routes = routes;
         this.currentRoute = null;
-        this.loadedScripts = {};
+        // 每次渲染自增。脚本是异步下载的，若下载期间页面已经切走，
+        // 再执行就会把监听器绑到一份已经废弃的 DOM 上——这正是
+        // "合并页拖拽没反应、按钮一直禁用"的根因。
+        this.renderToken = 0;
+        this.sources = {};
+        // 页面级清理回调：凡是在 window / document.body 上挂监听器的页面脚本，
+        // 都必须在挂载时调用 router.onUnmount() 登记解绑，否则离开页面后监听器
+        // 会一直累积（曾经就因此导致"访问过图片转 PDF 后，合并页拖拽彻底失效"）。
+        this.cleanups = [];
+        // base.html 里静态引入的脚本只执行一次，路由不再重复注入
+        this.bootScripts = new Set(
+            Array.from(document.scripts).map((node) => this.normalize(node.src)).filter(Boolean)
+        );
         this.init();
+    }
+
+    normalize(src) {
+        if (!src) return '';
+        try {
+            return new URL(src, window.location.href).pathname;
+        } catch (e) {
+            return '';
+        }
     }
 
     init() {
@@ -25,18 +46,32 @@ class Router {
         return raw.split('?')[0];
     }
 
+    onUnmount(fn) {
+        if (typeof fn === 'function') {
+            this.cleanups.push(fn);
+        }
+    }
+
+    runCleanups() {
+        const list = this.cleanups;
+        this.cleanups = [];
+        list.forEach((fn) => {
+            try {
+                fn();
+            } catch (error) {
+                console.error('页面清理失败:', error);
+            }
+        });
+    }
+
     handleRoute() {
         const hash = this.getHash();
         const route = this.routes.find(r => r.path === hash);
-        
+
         if (route) {
-            // 离开当前页面前，先销毁上一页脚本实例持有的全局监听器。
-            if (this.currentRoute && this.currentRoute !== route) {
-                if (typeof window.__pdfMergeCleanup === 'function') {
-                    try { window.__pdfMergeCleanup(); } catch (e) { /* ignore */ }
-                }
-            }
-            this.unloadRouteScripts();
+            // 离开当前页面前，先解绑上一页挂在 window / body 上的监听器
+            this.runCleanups();
+            this.renderToken++;
             this.currentRoute = route;
             this.render(route);
             this.updateNav(hash);
@@ -57,62 +92,49 @@ class Router {
         }
     }
 
-    loadScript(src) {
-        return new Promise((resolve, reject) => {
-            // 同一脚本只执行一次：重复执行会重新声明顶层 const 导致语法错误，
-            // 也会让带全局监听器的脚本（如 script.js）产生多份实例。
-            this.loadedScripts[src] = this.loadedScripts[src] || { status: 'idle', queue: [] };
-            const entry = this.loadedScripts[src];
-
-            if (entry.status === 'loaded') {
-                resolve();
-                return;
-            }
-            if (entry.status === 'loading') {
-                entry.queue.push({ resolve, reject });
-                return;
-            }
-
-            // base.html 已经静态引入了某些脚本（如 it-tools.js），再注入一次会因
-            // 顶层 const 重复声明而抛 SyntaxError，这里直接视为已加载。
-            const baseSrc = src.split('?')[0];
-            const alreadyInPage = Array.from(document.scripts).some(
-                (node) => node.src && node.src.split('?')[0].endsWith(baseSrc)
-            );
-            if (alreadyInPage) {
-                entry.status = 'loaded';
-                resolve();
-                return;
-            }
-
-            entry.status = 'loading';
-            const script = document.createElement('script');
-            script.src = src;
-            script.dataset.routeScript = src;
-            script.onload = () => {
-                entry.status = 'loaded';
-                resolve();
-                entry.queue.forEach((q) => q.resolve());
-                entry.queue = [];
-            };
-            script.onerror = (error) => {
-                entry.status = 'idle';
-                reject(error);
-                entry.queue.forEach((q) => q.reject(error));
-                entry.queue = [];
-            };
-            document.body.appendChild(script);
-        });
-    }
-
     /**
-     * 路由切换时清理上一页注入的脚本实例。
-     * script.js 用 IIFE 维护独立状态，但会把 drop/dragover 等监听器挂在 window 上，
-     * 仅移除 <script> 节点不会解绑，旧实例会与新实例同时处理拖拽。
+     * 按需执行页面脚本。
+     * 与 <script src> 注入的区别：先取源码、再校验页面是否还在，
+     * 最后以行内脚本同步执行——不存在"晚到"的执行时机，也不会在 DOM 里
+     * 留下需要清理的节点。页面逻辑脚本每次进入都重新执行，因此必须可重跑：
+     * 顶层只能用 var / function，出现 const、let、class 会在第二次进入时抛
+     * SyntaxError 让整页失效（见 AGENTS.md 约定）。
      */
-    unloadRouteScripts() {
-        document.querySelectorAll('script[data-route-script]').forEach((script) => script.remove());
-        this.loadedScripts = {};
+    loadScript(src) {
+        const token = this.renderToken;
+        const path = this.normalize(src);
+        if (this.bootScripts.has(path)) {
+            return Promise.resolve(false);
+        }
+        if (!this.sources[src]) {
+            this.sources[src] = fetch(src)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('脚本加载失败: ' + src + ' (' + response.status + ')');
+                    }
+                    return response.text();
+                })
+                .catch((error) => {
+                    delete this.sources[src];
+                    throw error;
+                });
+        }
+        return this.sources[src].then((text) => {
+            if (token !== this.renderToken) {
+                return false; // 页面已切走，丢弃
+            }
+            const node = document.createElement('script');
+            node.textContent = text;
+            document.body.appendChild(node);
+            node.remove();
+            return true;
+        }).catch((error) => {
+            console.error(error);
+            if (typeof window.showAppToast === 'function') {
+                window.showAppToast('页面脚本加载失败，功能不可用：' + error.message);
+            }
+            return false;
+        });
     }
 
     updateNav(currentPath) {

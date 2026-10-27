@@ -63,8 +63,9 @@ var ImageToPDFConverter = class ImageToPDFConverter {
 
     setupDragAndDrop() {
         const uploadArea = document.getElementById('uploadArea');
+        const dragEvents = ['dragenter', 'dragover', 'dragleave', 'drop'];
 
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dragEvents.forEach(eventName => {
             uploadArea.addEventListener(eventName, this.preventDefaults, false);
             document.body.addEventListener(eventName, this.preventDefaults, false);
         });
@@ -85,6 +86,13 @@ var ImageToPDFConverter = class ImageToPDFConverter {
             const dt = e.dataTransfer;
             const files = dt.files;
             this.handleImageUpload(files);
+        });
+
+        // preventDefaults 里有 stopPropagation，body 上的这份若不解绑，
+        // 离开本页后全站任何拖拽都会被它吃掉（曾导致 PDF 合并页拖拽彻底失效）。
+        // uploadArea 的监听器随 DOM 一起消失，不需要处理。
+        router.onUnmount(() => {
+            dragEvents.forEach(eventName => document.body.removeEventListener(eventName, this.preventDefaults, false));
         });
     }
 

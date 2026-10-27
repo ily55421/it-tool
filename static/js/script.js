@@ -19,11 +19,6 @@
     };
     var el = {};
 
-    /* ---------- 上一实例清理（路由反复挂载防泄漏） ---------- */
-    if (window.__pdfMergeCleanup) {
-        try { window.__pdfMergeCleanup(); } catch (e) { /* ignore */ }
-    }
-
     /* ---------- 小工具 ---------- */
     function $(id) { return document.getElementById(id); }
 
@@ -400,15 +395,8 @@
             document.querySelectorAll('.pm-toast-wrap, .pm-zoom-layer').forEach(function (n) { n.remove(); });
         }
 
-        // 每个实例都把自己的解绑函数登记进列表：只保留"最后一个 cleanup"的话，
-        // 早先实例挂在 window 上的监听器会永远留在页面上，抢走拖拽事件。
-        window.__pdfMergeCleanups = window.__pdfMergeCleanups || [];
-        window.__pdfMergeCleanups.push(cleanup);
-        window.__pdfMergeCleanup = function () {
-            var list = window.__pdfMergeCleanups || [];
-            window.__pdfMergeCleanups = [];
-            list.forEach(function (fn) { try { fn(); } catch (e) { /* ignore */ } });
-        };
+        // 由 router 在切走本页时统一调用，避免多实例监听器叠加
+        router.onUnmount(cleanup);
     }
 
     function setupUploadArea() {

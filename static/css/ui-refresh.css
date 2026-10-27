@@ -96,7 +96,6 @@ h2 {
 
 /* ---------- 通用卡片 ---------- */
 .tool-form,
-.tool-card,
 .tool-result,
 .json-panel,
 .json-formatter-panel,
@@ -345,35 +344,6 @@ h2 {
 }
 
 /* ---------- 工具箱 / 图片导航卡片 ---------- */
-.tool-card {
-    border-radius: var(--ui-radius);
-    border: 1px solid var(--ui-line);
-    box-shadow: var(--ui-shadow);
-}
-
-.tool-card:hover {
-    transform: translateY(-3px);
-    border-color: #bcd9f0;
-    box-shadow: 0 10px 24px rgba(52, 152, 219, .15);
-}
-
-.tool-card-icon {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    border-radius: 12px;
-}
-
-.image-nav-card {
-    border-radius: var(--ui-radius);
-    border: 1px solid var(--ui-line);
-    box-shadow: var(--ui-shadow);
-}
-
-.image-nav-card:hover {
-    transform: translateY(-3px);
-    border-color: #bcd9f0;
-    box-shadow: 0 10px 24px rgba(52, 152, 219, .15);
-}
-
 .stat-card {
     border-radius: 12px;
     border: 1px solid var(--ui-line);
@@ -461,16 +431,6 @@ h2 {
     min-height: 0;
 }
 
-/* ---------- 工具箱首页底部提示 ---------- */
-.tools-footer-tip {
-    margin-top: 28px;
-    padding: 14px 18px;
-    text-align: center;
-    color: var(--ui-muted);
-    font-size: .85rem;
-    border-top: 1px dashed var(--ui-line);
-}
-
 /* ---------- 图片处理：模式按钮 ---------- */
 .mode-buttons {
     display: flex;
@@ -546,12 +506,6 @@ h2 {
     }
 }
 
-/* ---------- 响应式 ---------- */
-@media (max-width: 1100px) {
-    .tools-grid {
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    }
-}
 
 @media (max-width: 1024px) {
     .container {

@@ -58,7 +58,6 @@ header,
 .qrcode-header,
 .gif-header,
 .pdf-header,
-.image-nav-header {
     display: block;
     text-align: left;
     margin: 0 0 22px;
@@ -84,7 +83,6 @@ header h1,
 .gif-header h2,
 .pdf-header h1,
 .pdf-header h2,
-.image-nav-header h2,
 .diff-toolbar-title,
 .jv-toolbar-title {
     display: flex;

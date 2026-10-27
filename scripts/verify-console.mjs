@@ -31,7 +31,10 @@ await new Promise((r) => (ws.onopen = r));
 await send('Runtime.enable');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// 重新加载页面，捕获加载期异常
+// 重新加载页面，捕获加载期异常。先回到应用中心，否则沿用上一个脚本留下的页面，
+// 首屏断言会误报（图标墙只存在于中心页）。
+await ev(`window.location.hash = '#/apps'; 'ok'`);
+await sleep(300);
 await send('Page.enable');
 await send('Page.reload', { ignoreCache: true });
 await sleep(2500);

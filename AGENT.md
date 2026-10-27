@@ -80,30 +80,38 @@ dist/
 
 ## 前端脚本加载约束（重要）
 
-`router.loadScript()` 负责按需注入页面逻辑（如 `script.js`），有两条硬性规则：
+`router.loadScript()` 负责按需加载页面逻辑（如 `script.js`）。实现方式：先 `fetch` 源码，
+再校验"页面是否还在"，最后以**行内 `<script>` 同步执行**。因此：
 
-- **同一脚本只执行一次。** `it-tools.js` 用顶层 `const` 声明组件，重复执行会抛
-  `SyntaxError: Identifier 'toolsHomeComponent' has already been declared`；`base.html`
-  已静态引入的脚本，`loadScript` 会识别并跳过。
-- **切换路由时必须清理旧实例。** `script.js` 是 IIFE，各自维护 `state`，但把 `dragenter` /
-  `dragover` / `drop` 监听器挂在 `window` 上。仅移除 `<script>` 节点不会解绑，旧实例会与新
-  实例同时响应拖拽——表现为"文件已上传、按钮却一直禁用"（旧实例只更新已脱离文档的按钮）。
-  因此 `handleRoute()` 会先调用 `window.__pdfMergeCleanup()`，再移除带 `data-route-script`
-  标记的节点。
-
-新增带全局事件监听器的页面脚本时，必须提供对称的清理函数并挂到 `window` 上。
+- **不存在"晚到"的执行。** 老写法（注入 `<script src>` + 切换时移除节点）会在下载期间就被
+  切走页面，脚本仍会执行并把监听器绑到已废弃的 DOM 上——"文件已上传、按钮却一直禁用"就是它
+  引起的。现在下载完成时若 `renderToken` 已变，这份脚本直接作废。
+- **页面逻辑脚本每次进入都重新执行**（这样才有全新的 `state` 并绑到新 DOM），所以顶层声明
+  **只能用 `var` / `function`**：出现 `const`、`let`、`class` 会在第二次进入时抛
+  `SyntaxError: Identifier 'X' has already been declared`，整页失效。
+  历史上 qrcode-tool、image-format、split_pdf、md_to_docx、image_to_pdf、json_tool 都踩过。
+- **挂在 `window` / `document.body` 上的监听器必须登记解绑**：在挂载时调用
+  `router.onUnmount(fn)`，`handleRoute()` 会在切走前统一执行。
+  反面教材：`image_to_pdf.js` 曾在 body 上绑带 `stopPropagation` 的拖拽监听且从不移除，
+  导致用户访问过一次「图片转 PDF」后，本会话内 PDF 合并页的拖拽彻底失效。
+- `base.html` 静态引入的脚本（组件模板、it-tools.js 等）由构造期快照的 `bootScripts` 识别，
+  路由不会重复注入。
 
 上传类页面另有约定：`updateActions()` 必须在 `state.uploading = false` **之后**调用，
 否则按钮会按"上传中"被禁用，且之后没有任何时机恢复。
 
 自动化冒烟测试：启动客户端时设置 `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=9333`，
-然后运行 `node scripts/verify-merge.mjs`（走真实路径：进入合并页 → 拖拽上传 → 合并），
-以及 `node scripts/verify-console.mjs`（重载页面，断言无未捕获异常、差异对比可用）。
+然后依次运行：
+
+- `node scripts/verify-tools.mjs` —— 30 个工具页逐个驱动并断言产物（含一条
+  "跑完所有页面后合并页仍能响应真实拖拽"的回归护栏），当前 31/31。
+- `node scripts/verify-merge.mjs` —— 进入合并页 → 拖拽上传 → 合并 → 下载。
+- `node scripts/verify-console.mjs` —— 重载中心页，断言无未捕获异常、按需加载与差异对比可用。
 
 ### 第三方库按需加载
 
 `static/js/lib-loader.js` 提供 `window.ITLibs.load(name)`：pdf.js、jsQR、crypto-js、
-Sortable、EXIF、qrcode 不再写进 `base.html`，第一次用到时才注入 `<script>`，
+Sortable、EXIF、qrcode、gif.js 不再写进 `base.html`，第一次用到时才注入 `<script>`，
 避免每次启动都解析几百 KB 用不到的代码。
 
 - 用这些库之前必须先 `await ITLibs.load('pdfjs')`（或 `.then()`），否则会抛
@@ -121,6 +129,8 @@ Sortable、EXIF、qrcode 不再写进 `base.html`，第一次用到时才注入 
 - **新增工具必须同时改三处**：`router.js` 注册路由、`tools-registry.js` 登记条目（route 要和路由一致，否则图标墙里看不到）、工具页内的 `← 返回` 链接指向 `#/apps?cat=<分类id>`。
 - 分类筛选走查询串（`#/apps?cat=image`），`Router.getHash()` 会先剥掉 `?` 之后的部分再匹配路由。
 - 顶栏高度是 `--bar-h`（54px），`.main-content` 用它做 `padding-top`；整屏高的页面（差异对比、JSON 可视化）要用 `calc(100vh - var(--bar-h))`，写 `100vh` 会多出一屏滚动条。
+- 键盘：`Ctrl/⌘+K` 或 `/` 唤起搜索，方向键在图标间移动，`Enter` 打开，`Esc` 清空搜索或在工具页返回中心。
+- 「最近使用」分区存在 `localStorage` 的 `it-tools.recent`（最多 8 条），仅在无搜索词、无分类筛选时显示。
 
 ## 页面样式统一（ui-pages.css）
 

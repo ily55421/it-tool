@@ -334,6 +334,18 @@ body {
     opacity: 1;
 }
 
+.ac-hint {
+    margin: 14px 0 0;
+    font-size: .78rem;
+    color: #9fb0c1;
+    letter-spacing: .2px;
+}
+
+.ac-group-recent .ac-group-count {
+    background: #eaf3fe;
+    color: var(--brand-b, #1850d2);
+}
+
 /* ---------- 分类分区与图标网格 ---------- */
 .ac-group {
     margin-top: 30px;

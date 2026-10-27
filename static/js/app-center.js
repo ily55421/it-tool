@@ -12,6 +12,7 @@ const appCenterComponent = `
             <button type="button" class="ac-search-clear" id="acClear" hidden aria-label="清空搜索"></button>
         </div>
         <div class="ac-chips" id="acChips" role="tablist"></div>
+        <p class="ac-hint">Ctrl K 唤起搜索 · 方向键选择 · Enter 打开 · Esc 清空</p>
     </div>
     <div class="ac-body" id="acGroups"></div>
     <p class="ac-empty" id="acEmpty" hidden>没有匹配的工具，换个关键词试试</p>
@@ -21,8 +22,30 @@ const appCenterComponent = `
 (function (global) {
     const T = window.ITToolset;
     const state = { query: '', cat: null };
+    const RECENT_KEY = 'it-tools.recent';
+    const RECENT_MAX = 8;
     // 分类 chip 属于页面内切换，保留搜索词；从别的页面进入则视为一次全新打开。
     let keepQuery = false;
+
+    function recentRoutes() {
+        try {
+            const raw = JSON.parse(window.localStorage.getItem(RECENT_KEY) || '[]');
+            if (!Array.isArray(raw)) return [];
+            return raw.map(function (route) { return T.toolByRoute(route); }).filter(Boolean);
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function rememberRecent(route) {
+        try {
+            const list = JSON.parse(window.localStorage.getItem(RECENT_KEY) || '[]');
+            const next = [route].concat(list.filter(function (r) { return r !== route; })).slice(0, RECENT_MAX);
+            window.localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+        } catch (e) {
+            // 隐私模式或存储写满时忽略，最近使用只是加速手段，不该影响主流程
+        }
+    }
 
     function categoryFromHash() {
         const hash = window.location.hash.slice(1);
@@ -78,6 +101,19 @@ const appCenterComponent = `
             + '" data-cat="">全部</button>' + chips;
     }
 
+    function recentGroup() {
+        const tools = recentRoutes();
+        if (!tools.length) return '';
+        return '<section class="ac-group ac-group-recent" style="--ac-a:#2f7fe8;--ac-b:#1850d2">'
+            + '<header class="ac-group-head">'
+            + '<span class="ac-group-icon">' + T.svg(T.UI_ICONS.grid) + '</span>'
+            + '<h2 class="ac-group-title">最近使用</h2>'
+            + '<span class="ac-group-count">' + tools.length + '</span>'
+            + '</header>'
+            + '<div class="ac-grid">' + tools.map(tileMarkup).join('') + '</div>'
+            + '</section>';
+    }
+
     function renderGroups() {
         const tools = visibleTools();
         const body = document.getElementById('acGroups');
@@ -85,7 +121,8 @@ const appCenterComponent = `
             const cat = T.categoryById(state.cat);
             body.innerHTML = tools.length ? groupMarkup(cat, tools) : '';
         } else {
-            body.innerHTML = T.CATEGORIES.map(function (cat) {
+            const recent = state.query.trim() ? '' : recentGroup();
+            body.innerHTML = recent + T.CATEGORIES.map(function (cat) {
                 const grouped = tools.filter(function (t) { return t.cat === cat.id; });
                 return grouped.length ? groupMarkup(cat, grouped) : '';
             }).join('');
@@ -128,6 +165,32 @@ const appCenterComponent = `
         refresh();
     }
 
+    function focusSearch() {
+        const input = document.getElementById('acSearch');
+        if (!input) {
+            keepQuery = false;
+            window.location.hash = '#/apps';
+            return;
+        }
+        input.focus();
+        input.select();
+    }
+
+    // 方向键在图标之间移动焦点：图标墙用 <a> 渲染，回车天然就是打开
+    function moveFocus(step) {
+        const tiles = Array.prototype.slice.call(document.querySelectorAll('#acGroups .ac-tile'));
+        if (!tiles.length) return;
+        const active = document.activeElement;
+        let index = tiles.indexOf(active);
+        if (index < 0) {
+            index = step > 0 ? 0 : tiles.length - 1;
+        } else {
+            index = Math.min(tiles.length - 1, Math.max(0, index + step));
+        }
+        tiles[index].focus();
+        tiles[index].scrollIntoView({ block: 'nearest' });
+    }
+
     function wire() {
         const input = document.getElementById('acSearch');
         if (!input) return;
@@ -137,9 +200,21 @@ const appCenterComponent = `
             refresh();
         });
         input.addEventListener('keydown', function (event) {
-            if (event.key !== 'Enter') return;
-            const first = document.querySelector('#acGroups .ac-tile');
-            if (first) window.location.hash = first.getAttribute('href').slice(1);
+            if (event.key === 'Escape') {
+                state.query = '';
+                input.value = '';
+                refresh();
+                return;
+            }
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                moveFocus(1);
+                return;
+            }
+            if (event.key === 'Enter') {
+                const first = document.querySelector('#acGroups .ac-tile');
+                if (first) window.location.hash = first.getAttribute('href').slice(1);
+            }
         });
         document.getElementById('acClear').addEventListener('click', function () {
             state.query = '';
@@ -270,6 +345,7 @@ const appCenterComponent = `
         if (back) back.hidden = center;
         if (home) home.classList.toggle('active', center);
         document.title = tool ? 'IT-Tools · ' + tool.name : 'IT-Tools 工具箱';
+        if (tool) rememberRecent(tool.route);
         polishPage(tool);
     }
 
@@ -281,10 +357,43 @@ const appCenterComponent = `
         }
         const home = document.getElementById('appBarHome');
         if (home) home.innerHTML = T.svg(T.UI_ICONS.grid) + '<span>应用中心</span>';
+
+        // 全局快捷键：启动器要能纯键盘用
+        document.addEventListener('keydown', function (event) {
+            const tag = (document.activeElement || {}).tagName || '';
+            const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                focusSearch();
+                return;
+            }
+            if (event.key === '/' && !typing && !event.ctrlKey && !event.metaKey && !event.altKey) {
+                event.preventDefault();
+                focusSearch();
+                return;
+            }
+            if (event.key === 'Escape' && !typing && !isCenterPath(currentPath())) {
+                window.location.hash = '#/apps';
+                return;
+            }
+            if (!typing && event.target.closest && event.target.closest('#acGroups .ac-tile')) {
+                const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+                if (step) {
+                    event.preventDefault();
+                    moveFocus(step);
+                }
+            }
+        });
+    }
+
+    function currentPath() {
+        return window.location.hash.slice(1).split('?')[0] || '/';
     }
 
     global.AppCenter = {
         mount: function () { mount(); wire(); },
+        focusSearch: focusSearch,
         onRoute: onRoute
     };
 

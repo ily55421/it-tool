@@ -176,29 +176,6 @@
     line-height: 1.8;
 }
 
-/* 滚动条样式 */
-.json-output::-webkit-scrollbar,
-#jsonInput::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.json-output::-webkit-scrollbar-track,
-#jsonInput::-webkit-scrollbar-track {
-    background: var(--bg-primary);
-}
-
-.json-output::-webkit-scrollbar-thumb,
-#jsonInput::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 4px;
-}
-
-.json-output::-webkit-scrollbar-thumb:hover,
-#jsonInput::-webkit-scrollbar-thumb:hover {
-    background: var(--text-secondary);
-}
-
 /* 响应式 */
 @media (max-width: 768px) {
     .json-formatter-main {

@@ -40,9 +40,13 @@ fn run() -> Result<(), String> {
     theme_title_bar(&window);
 
     // 用侧边栏同色做 WebView 底色：首帧到来前不会闪白，视觉上更像原生深色应用
+    let hwnd = window_handle(&window);
     let _webview = WebViewBuilder::new()
         .with_url(&url)
         .with_background_color((24, 34, 52, 255))
+        // 标题栏跟随当前页面（前端按路由改 document.title），
+        // 这样应用内顶栏只放面包屑，不必和标题栏各写一遍产品名
+        .with_document_title_changed_handler(move |title| set_window_title(hwnd, &title))
         .build(&window)
         .map_err(|error| {
             format!(
@@ -124,6 +128,40 @@ fn dwm_set(
 
 #[cfg(not(windows))]
 fn theme_title_bar(_window: &Window) {}
+
+/// 窗口句柄：`hwnd()` 只在 Windows 的扩展 trait 上，包一层让 `run()` 保持跨平台。
+#[cfg(windows)]
+fn window_handle(window: &Window) -> *mut std::ffi::c_void {
+    use tao::platform::windows::WindowExtWindows;
+
+    window.hwnd() as *mut std::ffi::c_void
+}
+
+#[cfg(not(windows))]
+fn window_handle(_window: &Window) -> *mut std::ffi::c_void {
+    std::ptr::null_mut()
+}
+
+/// 把 document.title 同步到窗口标题栏。回调由 WebView2 在创建它的线程（即 UI 线程）
+/// 上触发，因此直接 SetWindowTextW 即可，不需要绕事件循环。
+#[cfg(windows)]
+fn set_window_title(hwnd: *mut std::ffi::c_void, title: &str) {
+    #[link(name = "user32")]
+    extern "system" {
+        fn SetWindowTextW(hwnd: *mut std::ffi::c_void, text: *const u16) -> i32;
+    }
+
+    if hwnd.is_null() || title.is_empty() {
+        return;
+    }
+    let wide: Vec<u16> = title.encode_utf16().chain(std::iter::once(0)).collect();
+    unsafe {
+        SetWindowTextW(hwnd, wide.as_ptr());
+    }
+}
+
+#[cfg(not(windows))]
+fn set_window_title(_hwnd: *mut std::ffi::c_void, _title: &str) {}
 
 fn start_server(state: AppState) -> Result<u16, String> {
     let listener =

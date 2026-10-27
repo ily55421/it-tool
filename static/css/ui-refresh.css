@@ -462,27 +462,6 @@ h2 {
     color: var(--ui-blue-dark);
 }
 
-/* ---------- 滚动条 ---------- */
-#app ::-webkit-scrollbar,
-.info-container::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-#app ::-webkit-scrollbar-thumb,
-.info-container::-webkit-scrollbar-thumb {
-    background: #c9d6e2;
-    border-radius: 8px;
-}
-
-#app ::-webkit-scrollbar-thumb:hover {
-    background: #b3c4d4;
-}
-
-#app ::-webkit-scrollbar-track {
-    background: transparent;
-}
-
 /* ---------- 空元素不占位 ---------- */
 .error-message:empty,
 .json-message:empty {

@@ -357,7 +357,8 @@ const appCenterComponent = `
             crumb.innerHTML = parts.join('<span class="app-bar-sep">/</span>');
         }
         if (back) back.hidden = center;
-        if (home) home.classList.toggle('active', center);
+        // 中心页的面包屑本身就是「应用中心」，右侧按钮再写一遍是三重重复
+        if (home) home.hidden = center;
         document.title = tool ? 'IT-Tools · ' + tool.name : 'IT-Tools 工具箱';
         if (tool) rememberRecent(tool.route);
         polishPage(tool);

@@ -116,6 +116,10 @@ dist/
 
 改动路由表或脚本加载顺序后，这三条必须全绿：只跑功能套件不够，晚执行的逻辑脚本会静默拿到 null 元素。
 
+- `node scripts/check-css.mjs` —— CSS 结构自检（括号配对 + 检测"选择器未闭合就出现声明"）。
+  删改选择器列表时极易连带删掉规则的开括号 `{`，这类错误不会报编译失败，只会让整条规则
+  被浏览器丢弃、样式莫名失效；改完样式务必跑一次。
+
 ### 第三方库按需加载
 
 `static/js/lib-loader.js` 提供 `window.ITLibs.load(name)`：pdf.js、jsQR、crypto-js、

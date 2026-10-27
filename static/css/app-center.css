@@ -41,13 +41,20 @@ body {
 .app-bar-brand {
     display: flex;
     align-items: center;
-    gap: 10px;
-    color: #f1f5f9;
-    text-decoration: none;
-    font-size: 1.02rem;
-    font-weight: 700;
-    letter-spacing: .3px;
     flex-shrink: 0;
+    line-height: 0;
+    border-radius: 9px;
+    padding: 3px;
+    transition: background-color .18s ease;
+}
+
+.app-bar-brand:hover {
+    background: rgba(255, 255, 255, .09);
+}
+
+.app-bar-brand:focus-visible {
+    outline: 2px solid #5aa2f0;
+    outline-offset: 1px;
 }
 
 .app-bar-logo {
@@ -149,15 +156,13 @@ body {
     height: 16px;
 }
 
+.app-bar-home[hidden] {
+    display: none;
+}
+
 .app-bar-home:hover {
     background: rgba(255, 255, 255, .09);
     color: #fff;
-}
-
-.app-bar-home.active {
-    background: linear-gradient(135deg, #3498db, #2472a8);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(52, 152, 219, .3);
 }
 
 /* ---------- 应用中心页面 ---------- */

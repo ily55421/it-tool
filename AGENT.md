@@ -4,7 +4,7 @@
 
 ## 项目概览
 
-IT-Tools 是 Windows 桌面工具箱：tao + wry/WebView2 承载界面，axum 在 `127.0.0.1` 随机端口提供本地服务，前端资源经 `rust-embed` 编译进可执行文件。原 Python/Flask 版本（`app.py`）已不再使用，仅作参考保留。
+IT-Tools 是 Windows 桌面工具箱：tao + wry/WebView2 承载界面，axum 在 `127.0.0.1` 随机端口提供本地服务，前端资源经 `rust-embed` 编译进可执行文件。最早的 Python/Flask 版本（`app.py`、`requirements.txt`、`templates/index.html`）已废弃并删除，功能全部由 Rust 侧重写。
 
 | 路径 | 作用 |
 | --- | --- |

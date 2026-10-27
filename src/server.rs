@@ -54,8 +54,32 @@ pub fn router(state: AppState) -> Router {
         .route("/api/ulid", post(api_ulid))
         .route("/api/boolean", post(api_boolean))
         .route("/api/url-params", post(api_url_params))
+        .route(
+            "/api/settings",
+            get(api_settings).post(api_settings_update),
+        )
         .layer(DefaultBodyLimit::max(1024 * 1024 * 1024))
         .with_state(state)
+}
+
+/// 读取界面偏好。WebView2 的 localStorage 按源隔离，而本服务端口每次启动随机，
+/// 所以客户端需要跨启动保留的东西（如最近使用）只能存在这里。
+async fn api_settings(State(state): State<AppState>) -> Response {
+    ok_json(state.read_settings())
+}
+
+async fn api_settings_update(State(state): State<AppState>, Json(body): Json<Value>) -> Response {
+    if body
+        .get("recent")
+        .and_then(Value::as_array)
+        .is_some_and(|list| list.len() > 50)
+    {
+        return api_error(StatusCode::BAD_REQUEST, "recent 列表过长");
+    }
+    match state.update_settings(&body) {
+        Ok(merged) => ok_json(merged),
+        Err(error) => api_error(StatusCode::INTERNAL_SERVER_ERROR, error),
+    }
 }
 
 fn ok_json(value: Value) -> Response {

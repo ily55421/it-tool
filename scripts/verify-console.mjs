@@ -75,6 +75,15 @@ console.log(
     .catch(e => 'ERR ' + e.message)`)
 );
 
+// 界面偏好存在本地服务（localStorage 因随机端口跨启动必丢）
+console.log(
+  '设置接口:',
+  await ev(`fetch('/api/settings')
+    .then(r => r.ok ? r.json() : 'HTTP ' + r.status)
+    .then(v => JSON.stringify({ ok: v !== null && typeof v === 'object', keys: Object.keys(v || {}) }))
+    .catch(e => 'ERR ' + e.message)`)
+);
+
 // 按需加载确实能把 pdf.js 拉起来
 console.log(
   'pdfjs 按需加载:',

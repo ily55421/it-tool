@@ -41,6 +41,10 @@ pub struct AppState {
     pub files: Arc<Mutex<Vec<FileMeta>>>,
     pub split_files: Arc<Mutex<HashMap<String, SplitFile>>>,
     pub md_files: Arc<Mutex<HashMap<String, MdFile>>>,
+    /// 界面偏好（如最近使用）。WebView2 的 localStorage 按源隔离，而本服务端口
+    /// 每次启动都是随机的，所以客户端存储跨重启一定会丢，必须落到这里。
+    pub settings_path: PathBuf,
+    pub settings: Arc<Mutex<serde_json::Value>>,
 }
 
 impl Clone for AppState {
@@ -57,8 +61,17 @@ impl Clone for AppState {
             files: self.files.clone(),
             split_files: self.split_files.clone(),
             md_files: self.md_files.clone(),
+            settings_path: self.settings_path.clone(),
+            settings: self.settings.clone(),
         }
     }
+}
+
+fn load_settings(path: &PathBuf) -> serde_json::Value {
+    fs::read_to_string(path)
+        .ok()
+        .and_then(|text| serde_json::from_str(&text).ok())
+        .unwrap_or_else(|| serde_json::json!({}))
 }
 
 pub fn app_data_dir() -> PathBuf {
@@ -108,6 +121,8 @@ impl AppState {
             fs::create_dir_all(dir).map_err(|e| format!("无法创建临时目录: {e}"))?;
         }
 
+        let settings_path = base.join("settings.json");
+
         Ok(AppState {
             root,
             uploads,
@@ -120,7 +135,39 @@ impl AppState {
             files: Arc::new(Mutex::new(Vec::new())),
             split_files: Arc::new(Mutex::new(HashMap::new())),
             md_files: Arc::new(Mutex::new(HashMap::new())),
+            settings: Arc::new(Mutex::new(load_settings(&settings_path))),
+            settings_path,
         })
+    }
+
+    /// 合并写入界面偏好：只接受对象顶层键，整体落盘一次。
+    pub fn update_settings(&self, patch: &serde_json::Value) -> Result<serde_json::Value, String> {
+        let mut merged = self
+            .settings
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .clone();
+        let object = merged
+            .as_object_mut()
+            .ok_or_else(|| "设置根节点不是对象".to_string())?;
+        if let Some(entries) = patch.as_object() {
+            for (key, value) in entries {
+                object.insert(key.clone(), value.clone());
+            }
+        }
+        let text = serde_json::to_string_pretty(&merged).map_err(|e| e.to_string())?;
+        fs::write(&self.settings_path, text).map_err(|e| format!("无法写入设置: {e}"))?;
+        if let Ok(mut current) = self.settings.lock() {
+            *current = merged.clone();
+        }
+        Ok(merged)
+    }
+
+    pub fn read_settings(&self) -> serde_json::Value {
+        self.settings
+            .lock()
+            .unwrap_or_else(|poisoned| poisoned.into_inner())
+            .clone()
     }
 }
 

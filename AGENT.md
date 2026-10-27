@@ -9,7 +9,8 @@ IT-Tools 是 Windows 桌面工具箱：tao + wry/WebView2 承载界面，axum �
 | 路径 | 作用 |
 | --- | --- |
 | `src/main.rs` | 窗口与 WebView2 启动、内嵌服务启动 |
-| `src/server.rs` | Axum 路由，对应原 Flask 全部接口 |
+| `src/server.rs` | Axum 路由，对应原 Flask 全部接口；含 `/api/settings` 界面偏好读写 |
+| `src/state.rs` | 数据目录、pdfium 装载、上传文件表；`settings.json` 偏好持久化 |
 | `src/pdf.rs` | lopdf 合并/拆分，pdfium 页面渲染 |
 | `src/ebook.rs` | EPUB/MOBI 转 PDF（genpdf + 中文字体） |
 | `src/md_docx.rs` | Markdown 转 `.docx`（直接生成 OOXML） |
@@ -137,7 +138,9 @@ Sortable、EXIF、qrcode、gif.js 不再写进 `base.html`，第一次用到时�
 - 分类筛选走查询串（`#/apps?cat=image`），`Router.getHash()` 会先剥掉 `?` 之后的部分再匹配路由。
 - 顶栏高度是 `--bar-h`（54px），`.main-content` 用它做 `padding-top`；整屏高的页面（差异对比、JSON 可视化）要用 `calc(100vh - var(--bar-h))`，写 `100vh` 会多出一屏滚动条。
 - 键盘：`Ctrl/⌘+K` 或 `/` 唤起搜索，方向键在图标间移动，`Enter` 打开，`Esc` 清空搜索或在工具页返回中心。
-- 「最近使用」分区存在 `localStorage` 的 `it-tools.recent`（最多 8 条），仅在无搜索词、无分类筛选时显示。
+- 「最近使用」分区最多 8 条，存在 `%LOCALAPPDATA%\pdfmer\settings.json`，经 `GET/POST /api/settings` 读写。
+  **不要用 `localStorage` 存需要跨启动保留的东西**：WebView2 的存储按源隔离，而本服务端口每次启动随机
+  （这是防本地端口抢占的有意设计），客户端存储跨重启一定会丢。新增偏好直接往设置对象加键即可。
 
 ## 页面样式统一（ui-pages.css）
 

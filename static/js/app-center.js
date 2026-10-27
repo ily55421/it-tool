@@ -22,29 +22,43 @@ const appCenterComponent = `
 (function (global) {
     const T = window.ITToolset;
     const state = { query: '', cat: null };
-    const RECENT_KEY = 'it-tools.recent';
     const RECENT_MAX = 8;
     // 分类 chip 属于页面内切换，保留搜索词；从别的页面进入则视为一次全新打开。
     let keepQuery = false;
 
+    // 偏好存在本地服务而不是 localStorage：WebView2 的存储按源隔离，
+    // 而本服务端口每次启动都不同，客户端存储跨重启一定会丢。
+    const settings = { data: {}, loaded: false };
+
+    function loadSettings() {
+        return fetch('/api/settings')
+            .then(function (response) { return response.ok ? response.json() : {}; })
+            .then(function (data) {
+                settings.data = data && typeof data === 'object' ? data : {};
+            })
+            .catch(function () { /* 拿不到就用空默认值，不影响主流程 */ })
+            .then(function () {
+                settings.loaded = true;
+                // 首屏可能已经渲染过一次（那时还没有数据），补一次重绘
+                if (document.getElementById('acGroups')) refresh();
+            });
+    }
+
     function recentRoutes() {
-        try {
-            const raw = JSON.parse(window.localStorage.getItem(RECENT_KEY) || '[]');
-            if (!Array.isArray(raw)) return [];
-            return raw.map(function (route) { return T.toolByRoute(route); }).filter(Boolean);
-        } catch (e) {
-            return [];
-        }
+        const list = settings.data.recent;
+        if (!Array.isArray(list)) return [];
+        return list.map(function (route) { return T.toolByRoute(route); }).filter(Boolean);
     }
 
     function rememberRecent(route) {
-        try {
-            const list = JSON.parse(window.localStorage.getItem(RECENT_KEY) || '[]');
-            const next = [route].concat(list.filter(function (r) { return r !== route; })).slice(0, RECENT_MAX);
-            window.localStorage.setItem(RECENT_KEY, JSON.stringify(next));
-        } catch (e) {
-            // 隐私模式或存储写满时忽略，最近使用只是加速手段，不该影响主流程
-        }
+        const current = Array.isArray(settings.data.recent) ? settings.data.recent : [];
+        const next = [route].concat(current.filter(function (r) { return r !== route; })).slice(0, RECENT_MAX);
+        settings.data.recent = next; // 乐观更新，本会话立即可见
+        fetch('/api/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recent: next })
+        }).catch(function () { /* 写失败只影响下次启动的记忆 */ });
     }
 
     function categoryFromHash() {
@@ -397,5 +411,8 @@ const appCenterComponent = `
         onRoute: onRoute
     };
 
-    document.addEventListener('DOMContentLoaded', wireBar);
+    // 本脚本是 defer 的，执行时 DOM 已解析完，直接初始化即可；
+    // 偏好要尽早开始拉取，首屏的「最近使用」才不会闪空。
+    wireBar();
+    loadSettings();
 })(window);

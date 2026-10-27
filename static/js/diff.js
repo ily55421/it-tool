@@ -1,4 +1,4 @@
-const diffComponent = `
+var diffComponent = `
 <div class="diff-container" id="diffApp">
     <div class="diff-toolbar">
         <span class="diff-toolbar-title">🔍 DiffFlow 文本差异对比</span>
@@ -55,7 +55,7 @@ const diffComponent = `
 </div>
 `;
 
-let diffState = {
+var diffState = {
     view: 'side-by-side',
     ignoreWs: false,
     wordWrap: false,

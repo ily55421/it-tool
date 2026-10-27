@@ -25,14 +25,8 @@
     <script src="/static/js/lib-loader.js" defer></script>
     <script src="/static/js/tools-registry.js" defer></script>
     <script src="/static/js/app-center.js" defer></script>
-    <script src="/static/js/qrcode-tool-component.js" defer></script>
-    <script src="/static/js/image-format-component.js" defer></script>
-    <script src="/static/js/image-idphoto-component.js" defer></script>
-    <script src="/static/js/pdf-to-image-component.js" defer></script>
-    <script src="/static/js/gif-tool-component.js" defer></script>
-    <script src="/static/js/json-formatter.js" defer></script>
-    <script src="/static/js/image-processor.js" defer></script>
-    <script src="/static/js/image-exif.js" defer></script>
+    <!-- 其余页面脚本（各工具组件与逻辑）由 router 在渲染该路由前按需加载，
+         启动时只解析顶栏与应用中心需要的这三个文件 -->
 </head>
 <body>
     <header class="app-bar">
@@ -51,9 +45,6 @@
         </div>
     </main>
 
-    <script src="/static/js/it-tools.js" defer></script>
-    <script src="/static/js/diff.js" defer></script>
-    <script src="/static/js/json-vision.js" defer></script>
     <script src="/static/js/router.js" defer></script>
 </body>
 </html>

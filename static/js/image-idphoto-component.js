@@ -1,4 +1,4 @@
-const imageIdPhotoComponent = `
+var imageIdPhotoComponent = `
 <div class="idphoto-container">
     <div class="idphoto-header">
         <h2>🪪 证件照处理工具</h2>
@@ -126,17 +126,17 @@ const imageIdPhotoComponent = `
 </div>
 `;
 
-let currentIdPhoto = null;
-let currentBgColor = 'white';
-let processedIdPhotoBlob = null;
+var currentIdPhoto = null;
+var currentBgColor = 'white';
+var processedIdPhotoBlob = null;
 
-const BG_COLORS = {
+var BG_COLORS = {
     white: { r: 255, g: 255, b: 255 },
     blue: { r: 0, g: 112, b: 186 },
     red: { r: 192, g: 0, b: 0 }
 };
 
-const PHOTO_SIZES = {
+var PHOTO_SIZES = {
     '1': { width: 25, height: 35, name: '1寸' },
     '2': { width: 35, height: 49, name: '2寸' },
     '小1寸': { width: 22, height: 32, name: '小1寸' },

@@ -1,4 +1,4 @@
-const qrcodeToolComponent = `
+var qrcodeToolComponent = `
 <div class="qrcode-tool-container">
     <div class="qrcode-header">
         <h2>📱 二维码工具</h2>

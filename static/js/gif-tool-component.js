@@ -1,4 +1,4 @@
-const gifToolComponent = `
+var gifToolComponent = `
 <div class="gif-tool-container">
     <div class="gif-header">
         <h2>🎬 GIF工具箱</h2>
@@ -243,8 +243,8 @@ const gifToolComponent = `
 </div>
 `;
 
-let gifImages = [];
-let speedValue = 100;
+var gifImages = [];
+var speedValue = 100;
 
 function switchGifTab(tab) {
     document.querySelectorAll('.gif-tab-btn').forEach(btn => btn.classList.remove('active'));

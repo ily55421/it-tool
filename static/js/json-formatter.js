@@ -1,4 +1,4 @@
-const jsonFormatterComponent = `
+var jsonFormatterComponent = `
 <div class="json-formatter-container">
     <div class="json-formatter-header">
         <h2>JSON 格式化工具</h2>
@@ -36,16 +36,13 @@ const jsonFormatterComponent = `
 </div>
 `;
 
-let jsonDebounceTimer = null;
+var jsonDebounceTimer = null;
 
-// 页面加载完成后加载示例（仅当元素存在时）
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-        if (document.getElementById('jsonInput')) {
-            jsonLoadExample();
-        }
-    }, 100);
-});
+// 本脚本现在由 router 在页面渲染之后执行（元素已存在），
+// 再挂 DOMContentLoaded 永远不会触发，所以直接加载示例内容。
+if (document.getElementById('jsonInput')) {
+    jsonLoadExample();
+}
 
 function jsonLoadExample() {
     const example = {

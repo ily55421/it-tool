@@ -1,4 +1,4 @@
-const imageFormatComponent = `
+var imageFormatComponent = `
 <div class="image-format-container">
     <div class="format-header">
         <h2>🔄 图片格式转换工具</h2>

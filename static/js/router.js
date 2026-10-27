@@ -34,8 +34,8 @@ class Router {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.handleRoute());
         } else {
-            // 构造期间全局 `const router` 还没赋值，而各页 onMount 会调用 router.loadScript，
-            // 所以首屏渲染推迟到当前脚本执行完之后（此时 router 已初始化）。
+            // 构造期间全局 `const router` 还没赋值，而首屏渲染会触发按需加载脚本，
+            // 所以推迟到当前脚本执行完之后（此时 router 已初始化）。
             setTimeout(() => this.handleRoute(), 0);
         }
     }
@@ -64,7 +64,7 @@ class Router {
         });
     }
 
-    handleRoute() {
+    async handleRoute() {
         const hash = this.getHash();
         const route = this.routes.find(r => r.path === hash);
 
@@ -73,8 +73,12 @@ class Router {
             this.runCleanups();
             this.renderToken++;
             this.currentRoute = route;
-            this.render(route);
-            this.updateNav(hash);
+            const token = this.renderToken;
+            await this.renderRoute(route);
+            // 脚本加载期间可能又被切走，此时顶栏要跟着最新一次渲染走
+            if (token === this.renderToken) {
+                this.updateNav(hash);
+            }
         } else {
             const fallback = this.routes.find(r => r.path === '/');
             if (fallback) {
@@ -83,10 +87,27 @@ class Router {
         }
     }
 
+    async renderRoute(route) {
+        const token = this.renderToken;
+        // 1) 组件模板先就位：route.component 写成 () => X 就是为了把标识符解析推迟到这里
+        if (route.componentScript) {
+            await this.loadScript(route.componentScript);
+            if (token !== this.renderToken) return;
+        }
+        // 2) 渲染 DOM
+        this.render(route);
+        // 3) 页面逻辑脚本最后执行——它们在构造时就会 addEventListener，
+        //    早于渲染执行会拿到 null 元素
+        for (const src of new Set(route.scripts || [])) {
+            await this.loadScript(src);
+            if (token !== this.renderToken) return;
+        }
+    }
+
     render(route) {
         const app = document.getElementById('app');
-        app.innerHTML = route.component;
-        
+        app.innerHTML = typeof route.component === 'function' ? route.component() : route.component;
+
         if (route.onMount) {
             route.onMount();
         }
@@ -499,24 +520,18 @@ const routes = [
     { ...appCenterRoute, path: '/' },
     {
         path: '/pdf-merge',
-        component: pdfMergeComponent,
-        onMount: () => {
-            router.loadScript('/static/js/script.js?v=20261019b');
-        }
+        scripts: ['/static/js/script.js?v=20261019b'],
+        component: () => pdfMergeComponent
     },
     {
         path: '/image-to-pdf',
-        component: imageToPdfComponent,
-        onMount: () => {
-            router.loadScript('/static/js/image_to_pdf.js');
-        }
+        scripts: ['/static/js/image_to_pdf.js'],
+        component: () => imageToPdfComponent
     },
     {
         path: '/json-tool',
-        component: jsonToolComponent,
-        onMount: () => {
-            router.loadScript('/static/js/json_tool.js');
-        }
+        scripts: ['/static/js/json_tool.js'],
+        component: () => jsonToolComponent
     },
     {
         path: '/split-pdf',
@@ -594,9 +609,7 @@ const routes = [
     </main>
 </div>
 `,
-        onMount: () => {
-            router.loadScript('/static/js/split_pdf.js');
-        }
+        scripts: ['/static/js/split_pdf.js']
     },
     {
         path: '/md-to-word',
@@ -677,167 +690,138 @@ const routes = [
     </main>
 </div>
 `,
-        onMount: () => {
-            router.loadScript('/static/js/md_to_docx.js');
-        }
+        scripts: ['/static/js/md_to_docx.js']
     },
     // IT-Tools 路由
     {
         path: '/text-stats',
-        component: textStatsComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => textStatsComponent
     },
     {
         path: '/hash-text',
-        component: hashTextComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => hashTextComponent
     },
     {
         path: '/token-gen',
-        component: tokenGenComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => tokenGenComponent
     },
     {
         path: '/json-yaml',
-        component: jsonYamlComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => jsonYamlComponent
     },
     {
         path: '/bcrypt',
-        component: bcryptComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => bcryptComponent
     },
     {
         path: '/encrypt',
-        component: encryptComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => encryptComponent
     },
     {
         path: '/hmac',
-        component: hmacComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => hmacComponent
     },
     {
         path: '/bip39',
-        component: bip39Component,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => bip39Component
     },
     {
         path: '/uuid',
-        component: uuidComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => uuidComponent
     },
     {
         path: '/ulid',
-        component: ulidComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => ulidComponent
     },
     {
         path: '/git-tools',
-        component: gitToolsComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => gitToolsComponent
     },
     {
         path: '/boolean',
-        component: booleanComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => booleanComponent
     },
     {
         path: '/url-params',
-        component: urlParamsComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => urlParamsComponent
     },
     {
         path: '/finalshell',
-        component: finalShellComponent,
-        onMount: () => {
-            router.loadScript('/static/js/it-tools.js');
-        }
+        componentScript: '/static/js/it-tools.js',
+        component: () => finalShellComponent
     },
     {
         path: '/diff',
-        component: diffComponent,
-        onMount: () => {
-            router.loadScript('/static/js/diff.js');
-        }
+        componentScript: '/static/js/diff.js',
+        scripts: ['/static/js/diff.js'],
+        component: () => diffComponent
     },
     {
         path: '/json-formatter',
-        component: jsonFormatterComponent
+        componentScript: '/static/js/json-formatter.js',
+        component: () => jsonFormatterComponent
     },
     {
         path: '/json-vision',
-        component: jsonVisionComponent,
-        onMount: () => {
-            router.loadScript('/static/js/json-vision.js');
-        }
+        componentScript: '/static/js/json-vision.js',
+        scripts: ['/static/js/json-vision.js'],
+        component: () => jsonVisionComponent
     },
     {
         path: '/image-processor',
-        component: imageProcessorComponent
+        componentScript: '/static/js/image-processor.js',
+        component: () => imageProcessorComponent
     },
     {
         path: '/image-format',
-        component: imageFormatComponent,
-        onMount: () => {
-            router.loadScript('/static/js/image-format.js');
-        }
+        componentScript: '/static/js/image-format-component.js',
+        scripts: ['/static/js/image-format.js'],
+        component: () => imageFormatComponent
     },
     {
-            path: '/image-exif',
-            component: imageExifComponent
-        },
+        path: '/image-exif',
+        componentScript: '/static/js/image-exif.js',
+        component: () => imageExifComponent
+    },
     {
         path: '/qrcode-generate',
-        component: qrcodeToolComponent,
-        onMount: () => {
-            router.loadScript('/static/js/qrcode-tool.js');
-        }
+        componentScript: '/static/js/qrcode-tool-component.js',
+        scripts: ['/static/js/qrcode-tool.js'],
+        component: () => qrcodeToolComponent
     },
     {
         path: '/qrcode-parse',
-        component: qrcodeToolComponent,
-        onMount: () => {
-            router.loadScript('/static/js/qrcode-tool.js');
-        }
+        componentScript: '/static/js/qrcode-tool-component.js',
+        scripts: ['/static/js/qrcode-tool.js'],
+        component: () => qrcodeToolComponent
     },
     {
         path: '/image-idphoto',
-        component: imageIdPhotoComponent
+        componentScript: '/static/js/image-idphoto-component.js',
+        component: () => imageIdPhotoComponent
     },
     {
         path: '/pdf-to-image',
-        component: pdfToImageComponent
+        componentScript: '/static/js/pdf-to-image-component.js',
+        component: () => pdfToImageComponent
     },
     {
         path: '/gif-tools',
-        component: gifToolComponent
+        componentScript: '/static/js/gif-tool-component.js',
+        component: () => gifToolComponent
     }
 ];
 

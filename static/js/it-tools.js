@@ -3,7 +3,7 @@
 
 // ==================== 文本处理工具 ====================
 
-const textStatsComponent = `
+var textStatsComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=text" class="back-btn">← 返回</a>
@@ -49,7 +49,7 @@ const textStatsComponent = `
 </div>
 `;
 
-const hashTextComponent = `
+var hashTextComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=text" class="back-btn">← 返回</a>
@@ -84,7 +84,7 @@ const hashTextComponent = `
 </div>
 `;
 
-const tokenGenComponent = `
+var tokenGenComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=text" class="back-btn">← 返回</a>
@@ -127,7 +127,7 @@ const tokenGenComponent = `
 </div>
 `;
 
-const jsonYamlComponent = `
+var jsonYamlComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=text" class="back-btn">← 返回</a>
@@ -162,7 +162,7 @@ const jsonYamlComponent = `
 
 // ==================== 加密安全工具 ====================
 
-const bcryptComponent = `
+var bcryptComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=security" class="back-btn">← 返回</a>
@@ -192,7 +192,7 @@ const bcryptComponent = `
 </div>
 `;
 
-const encryptComponent = `
+var encryptComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=security" class="back-btn">← 返回</a>
@@ -229,7 +229,7 @@ const encryptComponent = `
 </div>
 `;
 
-const hmacComponent = `
+var hmacComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=security" class="back-btn">← 返回</a>
@@ -267,7 +267,7 @@ const hmacComponent = `
 </div>
 `;
 
-const bip39Component = `
+var bip39Component = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=security" class="back-btn">← 返回</a>
@@ -300,7 +300,7 @@ const bip39Component = `
 
 // ==================== ID生成器 ====================
 
-const uuidComponent = `
+var uuidComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=id" class="back-btn">← 返回</a>
@@ -332,7 +332,7 @@ const uuidComponent = `
 </div>
 `;
 
-const ulidComponent = `
+var ulidComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=id" class="back-btn">← 返回</a>
@@ -359,7 +359,7 @@ const ulidComponent = `
 
 // ==================== Git备忘录 ====================
 
-const gitToolsComponent = `
+var gitToolsComponent = `
 <div class="tools-container">
     <div class="tools-header">
         <h1>📋 Git备忘录</h1>
@@ -486,7 +486,7 @@ const gitToolsComponent = `
 
 // ==================== 其他工具 ====================
 
-const booleanComponent = `
+var booleanComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=other" class="back-btn">← 返回</a>
@@ -517,7 +517,7 @@ const booleanComponent = `
 </div>
 `;
 
-const urlParamsComponent = `
+var urlParamsComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <a href="#/apps?cat=other" class="back-btn">← 返回</a>
@@ -564,7 +564,7 @@ const urlParamsComponent = `
 
 // ==================== FinalShell 离线激活码生成器 ====================
 
-const finalShellComponent = `
+var finalShellComponent = `
 <div class="tool-detail">
     <div class="tool-detail-header">
         <h1>🔑 FinalShell 离线激活码生成器</h1>

@@ -1,4 +1,4 @@
-const imageProcessorComponent = `
+var imageProcessorComponent = `
 <div class="image-processor-container">
     <div class="image-processor-header">
         <h2>🖼️ 图片处理工具</h2>
@@ -231,14 +231,14 @@ const imageProcessorComponent = `
 `;
 
 // 全局变量
-let originalImage = null;
-let currentCanvas = null;
-let currentRotation = 0;
-let flipH = false;
-let flipV = false;
-let originalWidth = 0;
-let originalHeight = 0;
-let currentMode = 'basic';
+var originalImage = null;
+var currentCanvas = null;
+var currentRotation = 0;
+var flipH = false;
+var flipV = false;
+var originalWidth = 0;
+var originalHeight = 0;
+var currentMode = 'basic';
 
 // 处理模式切换
 function setMode(mode) {

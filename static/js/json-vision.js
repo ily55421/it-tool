@@ -1,4 +1,4 @@
-const jsonVisionComponent = `
+var jsonVisionComponent = `
 <div class="jv-container" id="jvContainer">
     <div class="jv-toolbar">
         <span class="jv-toolbar-title">📊 JSON Vision 可视化画布</span>
@@ -47,7 +47,7 @@ const jsonVisionComponent = `
 </div>
 `;
 
-let jvState = {
+var jvState = {
     json: null,
     nodes: [],
     edges: [],

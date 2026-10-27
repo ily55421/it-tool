@@ -80,22 +80,27 @@ dist/
 
 ## 前端脚本加载约束（重要）
 
-`router.loadScript()` 负责按需加载页面逻辑（如 `script.js`）。实现方式：先 `fetch` 源码，
-再校验"页面是否还在"，最后以**行内 `<script>` 同步执行**。因此：
+`base.html` 只静态加载 4 个脚本（lib-loader / tools-registry / app-center / router，合计约 67 KB），
+其余全部由 `router.js` 在渲染该路由时才加载。路由条目因此有两个字段，**执行顺序不同**：
 
-- **不存在"晚到"的执行。** 老写法（注入 `<script src>` + 切换时移除节点）会在下载期间就被
-  切走页面，脚本仍会执行并把监听器绑到已废弃的 DOM 上——"文件已上传、按钮却一直禁用"就是它
-  引起的。现在下载完成时若 `renderToken` 已变，这份脚本直接作废。
-- **页面逻辑脚本每次进入都重新执行**（这样才有全新的 `state` 并绑到新 DOM），所以顶层声明
-  **只能用 `var` / `function`**：出现 `const`、`let`、`class` 会在第二次进入时抛
-  `SyntaxError: Identifier 'X' has already been declared`，整页失效。
+- `componentScript`：定义页面 HTML 模板的文件。在 `app.innerHTML` **之前**加载，
+  路由表里写成 `component: () => xxxComponent`，把标识符解析推迟到脚本就位之后。
+- `scripts`：页面逻辑脚本。在渲染**之后**执行——它们大多在构造时 `getElementById(...).addEventListener`，
+  早于渲染执行会拿到 null 元素（`Cannot read properties of null`）。
+
+由此得到两条硬性规则：
+
+- **路由脚本顶层只能用 `var` / `function`。** 它们每次进入页面都会重新执行，出现 `const`、`let`、
+  `class` 会在第二次进入时抛 `SyntaxError: Identifier 'X' has already been declared`，整页失效。
   历史上 qrcode-tool、image-format、split_pdf、md_to_docx、image_to_pdf、json_tool 都踩过。
-- **挂在 `window` / `document.body` 上的监听器必须登记解绑**：在挂载时调用
-  `router.onUnmount(fn)`，`handleRoute()` 会在切走前统一执行。
-  反面教材：`image_to_pdf.js` 曾在 body 上绑带 `stopPropagation` 的拖拽监听且从不移除，
-  导致用户访问过一次「图片转 PDF」后，本会话内 PDF 合并页的拖拽彻底失效。
-- `base.html` 静态引入的脚本（组件模板、it-tools.js 等）由构造期快照的 `bootScripts` 识别，
-  路由不会重复注入。
+- **不存在"晚到执行"。** `loadScript` 先 `fetch` 源码、校验 `renderToken` 后再以行内脚本同步执行；
+  下载期间若已切走页面，这份脚本直接作废。老写法（注入 `<script src>` + 切换时移除节点）会把
+  监听器绑到已废弃的 DOM 上，表现为"文件已上传、按钮却一直禁用"。
+- **挂在 `window` / `document.body` 上的监听器必须登记解绑**：挂载时调用 `router.onUnmount(fn)`，
+  `handleRoute()` 会在切走前统一执行。反面教材：`image_to_pdf.js` 曾在 body 上绑带
+  `stopPropagation` 的拖拽监听且从不移除，导致用户访问过一次「图片转 PDF」后，
+  本会话内 PDF 合并页的拖拽彻底失效。
+- `base.html` 静态引入的脚本由构造期快照的 `bootScripts` 识别，路由不会重复注入。
 
 上传类页面另有约定：`updateActions()` 必须在 `state.uploading = false` **之后**调用，
 否则按钮会按"上传中"被禁用，且之后没有任何时机恢复。
@@ -107,6 +112,8 @@ dist/
   "跑完所有页面后合并页仍能响应真实拖拽"的回归护栏），当前 31/31。
 - `node scripts/verify-merge.mjs` —— 进入合并页 → 拖拽上传 → 合并 → 下载。
 - `node scripts/verify-console.mjs` —— 重载中心页，断言无未捕获异常、按需加载与差异对比可用。
+
+改动路由表或脚本加载顺序后，这三条必须全绿：只跑功能套件不够，晚执行的逻辑脚本会静默拿到 null 元素。
 
 ### 第三方库按需加载
 

@@ -1,4 +1,4 @@
-const imageExifComponent = `
+var imageExifComponent = `
 <div class="image-exif-container">
     <div class="exif-header">
         <h2>📝 图片Exif信息查看工具</h2>
@@ -43,7 +43,7 @@ const imageExifComponent = `
 </div>
 `;
 
-let currentExifData = null;
+var currentExifData = null;
 
 // 拖拽相关
 function handleDragOver(e) {

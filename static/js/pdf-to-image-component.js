@@ -1,4 +1,4 @@
-const pdfToImageComponent = `
+var pdfToImageComponent = `
 <div class="pdf-to-image-container">
     <div class="pdf-header">
         <h2>📄 PDF转图片工具</h2>
@@ -97,9 +97,9 @@ const pdfToImageComponent = `
 </div>
 `;
 
-let currentPdfFile = null;
-let currentPdfPages = [];
-let currentPreviewPage = 1;
+var currentPdfFile = null;
+var currentPdfPages = [];
+var currentPreviewPage = 1;
 
 function handlePdfDragOver(e) {
     e.preventDefault();

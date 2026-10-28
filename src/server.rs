@@ -654,7 +654,8 @@ async fn split_pdf(State(state): State<AppState>, Json(body): Json<Value>) -> Re
         return api_error(StatusCode::BAD_REQUEST, "请先将文件转换为 PDF");
     };
 
-    let stem = source
+    // 用上传时的原始名，而不是带 UUID 前缀的存盘名：拆分产物直接以这个 stem 命名给用户下载
+    let stem = Path::new(&file.filename)
         .file_stem()
         .and_then(|stem| stem.to_str())
         .unwrap_or("document");

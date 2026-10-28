@@ -688,11 +688,74 @@ function jvHandleFile(event) {
 }
 
 function jvExportPng() {
-    const container = document.getElementById('jvCanvasContainer');
-    const canvas = container.querySelector('canvas');
-    if (!canvas) {
+    // 图上的节点是 DOM + SVG 画的，容器里从来没有 <canvas>，
+    // 所以按同一套布局常量把当前视图重绘到离屏画布再导出。
+    const drawn = jvState.nodes
+        .map((node) => ({ node, el: document.getElementById(node.id) }))
+        .filter((item) => item.el);
+    if (!drawn.length) {
         alert('请先输入 JSON 数据');
         return;
+    }
+
+    const pad = 48;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const { node, el } of drawn) {
+        minX = Math.min(minX, node.x);
+        minY = Math.min(minY, node.y);
+        maxX = Math.max(maxX, node.x + el.offsetWidth);
+        maxY = Math.max(maxY, node.y + el.offsetHeight);
+    }
+
+    const scale = 2; // 位图按 2x 画，缩略查看时不至于糊
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round((maxX - minX + pad * 2) * scale);
+    canvas.height = Math.round((maxY - minY + pad * 2) * scale);
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+    ctx.translate(-minX + pad, -minY + pad);
+
+    const containerStyle = getComputedStyle(document.getElementById('jvCanvasContainer'));
+    ctx.fillStyle = containerStyle.backgroundColor;
+    ctx.fillRect(minX - pad, minY - pad, canvas.width / scale, canvas.height / scale);
+
+    ctx.strokeStyle = '#b9c8d8';
+    ctx.lineWidth = 1.5;
+    for (const edge of jvState.edges) {
+        const source = jvState.nodes.find((n) => n.id === edge.source);
+        const target = jvState.nodes.find((n) => n.id === edge.target);
+        if (!source || !target || !document.getElementById(source.id) || !document.getElementById(target.id)) continue;
+        // 端点算法与 jvRenderEdge 保持一致，导出的连线才会和屏幕上的走向重合
+        const sx = source.x + 180;
+        const sy = source.y + (source.type === 'object' || source.type === 'array' ? 20 : 30);
+        const tx = target.x;
+        const ty = target.y + (target.type === 'object' || target.type === 'array' ? 20 : 30);
+        const midX = (sx + tx) / 2;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.bezierCurveTo(midX, sy, midX, ty, tx, ty);
+        ctx.stroke();
+    }
+
+    for (const { node, el } of drawn) {
+        const style = getComputedStyle(el);
+        ctx.fillStyle = style.backgroundColor;
+        ctx.strokeStyle = style.borderTopColor;
+        ctx.lineWidth = parseFloat(style.borderTopWidth) || 1;
+        ctx.beginPath();
+        ctx.roundRect(node.x, node.y, el.offsetWidth, el.offsetHeight, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        for (const sel of ['.jv-node-key', '.jv-node-type', '.jv-node-value']) {
+            const textEl = el.querySelector(sel);
+            if (!textEl || !textEl.textContent.trim()) continue;
+            const ts = getComputedStyle(textEl);
+            ctx.font = `${ts.fontStyle} ${ts.fontWeight} ${ts.fontSize} ${ts.fontFamily}`;
+            ctx.fillStyle = ts.color;
+            ctx.textBaseline = 'top';
+            ctx.fillText(textEl.textContent.trim(), node.x + textEl.offsetLeft, node.y + textEl.offsetTop);
+        }
     }
 
     const link = document.createElement('a');

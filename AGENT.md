@@ -113,6 +113,12 @@ dist/
   "跑完所有页面后合并页仍能响应真实拖拽"的回归护栏），当前 31/31。
 - `node scripts/verify-merge.mjs` —— 进入合并页 → 拖拽上传 → 合并 → 下载。
 - `node scripts/verify-console.mjs` —— 重载中心页，断言无未捕获异常、按需加载与差异对比可用。
+- `node scripts/verify-downloads.mjs` —— **全站下载审计**：每个工具页先造出真实产物，
+  再用真实鼠标事件点掉页面上每一个「下载 / 导出 / 保存」控件，断言每个控件都触发了下载。
+  WebView2 里下载没有任何界面反馈，坏链接和好链接在屏幕上完全一样，只能靠 CDP 的
+  `Page.downloadWillBegin` 区分。`node scripts/verify-download.mjs` 是它的精简版（只查两条服务端链路）。
+  两个坑：点击前必须 `scrollIntoView`（否则点到视口外的坐标，会误判成"下载坏了"）；
+  落盘文件数只能当参考，重复下载同名产物会覆盖，计数不涨。
 
 改动路由表或脚本加载顺序后，这三条必须全绿：只跑功能套件不够，晚执行的逻辑脚本会静默拿到 null 元素。
 

@@ -13,7 +13,7 @@ use tao::dpi::LogicalSize;
 use tao::event::{Event, WindowEvent};
 use tao::event_loop::{ControlFlow, EventLoop};
 use tao::window::{Icon, Window, WindowBuilder};
-use wry::WebViewBuilder;
+use wry::{NewWindowResponse, WebViewBuilder};
 
 use crate::state::AppState;
 
@@ -47,6 +47,13 @@ fn run() -> Result<(), String> {
         // 标题栏跟随当前页面（前端按路由改 document.title），
         // 这样应用内顶栏只放面包屑，不必和标题栏各写一遍产品名
         .with_document_title_changed_handler(move |title| set_window_title(hwnd, &title))
+        // 不设这个处理器时，wry 会把 NewWindowRequested 直接标记为已处理并什么都不做，
+        // 于是 target="_blank" 的链接和 window.open() 点了没有任何反应
+        // （EXIF 地图链接、二维码「打开内容」都栽在这里）。
+        .with_new_window_req_handler(|uri, _| {
+            open_in_default_browser(&uri);
+            NewWindowResponse::Deny
+        })
         .build(&window)
         .map_err(|error| {
             format!(
@@ -162,6 +169,65 @@ fn set_window_title(hwnd: *mut std::ffi::c_void, title: &str) {
 
 #[cfg(not(windows))]
 fn set_window_title(_hwnd: *mut std::ffi::c_void, _title: &str) {}
+
+/// 把新窗口请求交给系统默认浏览器。
+///
+/// 只放行 http/https：其余 scheme（`javascript:`、`file:`、裸命令行）交给
+/// `ShellExecuteW` 等于把任意外部程序引进来，而这些链接的来源是用户扫到的二维码
+/// 与图片 EXIF，属于不可信输入。
+fn is_web_url(uri: &str) -> bool {
+    if uri.len() > 4096 {
+        return false;
+    }
+    url::Url::parse(uri)
+        .map(|parsed| matches!(parsed.scheme(), "http" | "https"))
+        .unwrap_or(false)
+}
+
+#[cfg(windows)]
+fn open_in_default_browser(uri: &str) {
+    use std::ffi::OsStr;
+    use std::os::windows::ffi::OsStrExt;
+
+    #[link(name = "shell32")]
+    extern "system" {
+        fn ShellExecuteW(
+            hwnd: *mut std::ffi::c_void,
+            operation: *const u16,
+            file: *const u16,
+            parameters: *const u16,
+            directory: *const u16,
+            show: i32,
+        ) -> isize;
+    }
+
+    fn wide(text: &str) -> Vec<u16> {
+        OsStr::new(text)
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect()
+    }
+
+    if !is_web_url(uri) {
+        return;
+    }
+    let operation = wide("open");
+    let file = wide(uri);
+    const SW_SHOWNORMAL: i32 = 1;
+    unsafe {
+        ShellExecuteW(
+            std::ptr::null_mut(),
+            operation.as_ptr(),
+            file.as_ptr(),
+            std::ptr::null(),
+            std::ptr::null(),
+            SW_SHOWNORMAL,
+        );
+    }
+}
+
+#[cfg(not(windows))]
+fn open_in_default_browser(_uri: &str) {}
 
 fn start_server(state: AppState) -> Result<u16, String> {
     let listener =

@@ -54,6 +54,11 @@ var ImageToPDFConverter = class ImageToPDFConverter {
             this.hideModal();
         });
 
+        // WebView2 里下载没有浏览器那套下载 UI，点了没有任何反馈，补一条提示说明文件去哪了
+        document.getElementById('downloadLink').addEventListener('click', () => {
+            alert('下载已开始，文件保存在「下载」文件夹');
+        });
+
         document.getElementById('customAngle').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 this.applyCustomRotation();

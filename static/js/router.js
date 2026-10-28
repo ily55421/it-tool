@@ -431,7 +431,7 @@ const imageToPdfComponent = `
             <div class="modal-content">
                 <h3>🎉 转换成功！</h3>
                 <p>图片已成功转换为 PDF</p>
-                <a id="downloadLink" class="btn btn-success" target="_blank">
+                <a id="downloadLink" class="btn btn-success" download>
                     📥 下载 PDF
                 </a>
                 <button id="closeModal" class="btn btn-secondary">

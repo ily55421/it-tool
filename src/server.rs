@@ -133,6 +133,14 @@ fn url_segment(name: &str) -> String {
     percent_encoding::utf8_percent_encode(name, percent_encoding::NON_ALPHANUMERIC).to_string()
 }
 
+/// 输出文件名前缀的 UUID 只用于防止同名互相覆盖，不该出现在用户看到的名字里。
+fn display_name(stored: &str) -> String {
+    match stored.split_once('_') {
+        Some((prefix, rest)) if !rest.is_empty() && uuid::Uuid::parse_str(prefix).is_ok() => rest.to_string(),
+        _ => stored.to_string(),
+    }
+}
+
 fn attachment_response(bytes: Vec<u8>, filename: &str, content_type: &str) -> Response {
     let fallback: String = filename
         .chars()
@@ -358,7 +366,7 @@ async fn merge(State(state): State<AppState>, Json(body): Json<Value>) -> Respon
 
     ok_json(json!({
         "success": true,
-        "merged_file": stored_name,
+        "merged_file": display_name(&stored_name),
         "download_url": format!("/download/{}", url_segment(&stored_name)),
     }))
 }
@@ -382,7 +390,7 @@ async fn download(State(state): State<AppState>, AxPath(name): AxPath<String>) -
     }
     let path = state.outputs.join(&name);
     match tokio::fs::read(&path).await {
-        Ok(bytes) => attachment_response(bytes, &name, "application/pdf"),
+        Ok(bytes) => attachment_response(bytes, &display_name(&name), "application/pdf"),
         Err(_) => not_found("File not found"),
     }
 }
@@ -456,7 +464,7 @@ async fn convert_image(State(state): State<AppState>, multipart: Multipart) -> R
     match image_pdf::convert_to_pdf(bytes, rotation, &output) {
         Ok(()) => ok_json(json!({
             "success": true,
-            "filename": stored_name,
+            "filename": display_name(&stored_name),
             "download_url": format!("/download/{}", url_segment(&stored_name)),
         })),
         Err(error) => internal_error(error),

@@ -16,7 +16,8 @@ const CDP = process.env.IT_TOOLS_CDP || 'http://127.0.0.1:9333';
 const only = process.argv.slice(2).map((a) => (a.startsWith('/') ? a : '/' + a));
 
 const targets = await (await fetch(CDP + '/json/list')).json();
-const page = targets.find((t) => t.type === 'page');
+// edge://downloads-hub 也算 page 目标（下载过一次就常驻），按 URL 排掉再挑主页面
+const page = targets.find((t) => t.type === 'page' && !/^(edge|devtools):\/\//.test(t.url));
 if (!page) {
   console.error('找不到页面目标，确认客户端已带 --remote-debugging-port=9333 启动');
   process.exit(2);

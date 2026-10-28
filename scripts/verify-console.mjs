@@ -1,6 +1,6 @@
 // 检查页面加载、按需加载与差异对比工具是否还有异常
 const list = await (await fetch('http://127.0.0.1:9333/json/list')).json();
-const page = list.find((t) => t.type === 'page');
+const page = list.find((t) => t.type === 'page' && !/^(edge|devtools):\/\//.test(t.url));
 const ws = new WebSocket(page.webSocketDebuggerUrl);
 
 let id = 0;
